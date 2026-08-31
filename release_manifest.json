@@ -1,0 +1,13 @@
+{
+  "repository": "yunju-baek/computer-architecture-verilog-tutorial",
+  "release_profile": "tutorial-only",
+  "version": "tutorial-1.0.0",
+  "published": ["tutorial"],
+  "assignments": [],
+  "assignment_release_policy": "Add each assignment to the public Git history at its announced release time.",
+  "toolchain": {
+    "iverilog_mode": "-g2012",
+    "student_rtl": "Verilog-2001 core subset",
+    "testbench": "Verilog and SystemVerilog supported by Icarus Verilog"
+  }
+}
