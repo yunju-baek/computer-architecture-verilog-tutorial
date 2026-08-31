@@ -2,6 +2,8 @@
 
 부산대학교 컴퓨터구조 수업에서 사용하는 실행형 Verilog 자습서다. 학생은 Icarus Verilog로 RTL과 testbench를 컴파일하고, 시뮬레이션 결과와 VCD 파형을 확인하며 컴퓨터구조의 상태 전이와 데이터 이동을 학습한다.
 
+웹에서 읽는 장별 자습서는 **[컴퓨터구조를 위한 Verilog 웹북](https://yunju-baek.github.io/computer-architecture-verilog-tutorial/)**에서 제공한다.
+
 ## 학습 목표
 
 - Verilog-2001의 조합논리와 순차논리 표현을 읽고 작성한다.
@@ -11,7 +13,7 @@
 
 ## 빠른 시작
 
-필수 도구는 GNU Make와 Icarus Verilog다. GTKWave는 VCD 파형 관찰에 활용한다.
+필수 도구는 Git, GNU Make와 Icarus Verilog다. 웹북 생성에는 Python 3을 사용한다. GTKWave는 VCD 파형 관찰에 사용하는 선택 도구다. 아래 명령은 macOS, Linux, WSL의 POSIX 셸 형식을 따른다.
 
 ```bash
 git clone https://github.com/yunju-baek/computer-architecture-verilog-tutorial.git
@@ -28,12 +30,28 @@ make test
 |---|---|
 | `make setup-check` | `iverilog`와 `vvp` 설치 상태 확인 |
 | `make test` | 10개 챕터의 정상 예제 실행 |
-| `make errors` | 의도적 결함 예제와 진단 메시지 확인 |
-| `make waves` | ch10 통합 예제의 VCD 생성 |
-| `make clean` | 생성된 실행 산출물 정리 |
-| `make package-check` | 공개 패키지 구조와 전체 예제 검증 |
+| `make errors` | 의도적 결함과 컴파일 진단을 학습 출력으로 확인 |
+| `make waves` | `tutorial/ch10/build/overview.vcd` 생성과 GTKWave 연동 |
+| `make webbook` | 12페이지 정적 웹북 생성과 링크 검증 |
+| `make webbook-check` | Python 문법, 새 웹북 빌드와 페이지 수 검증 |
+| `make clean` | Verilog와 웹북 생성물 정리 |
+| `make package-check` | 공개 패키지, 전체 예제와 웹북 검증 |
 
 세부 목차와 권장 학습 순서는 [tutorial/README.md](tutorial/README.md)에서 확인한다.
+
+## 웹북 생성과 배포
+
+웹북 12페이지는 시작 페이지, ch01~ch10과 빠른 참조 부록으로 구성된다. 본문을 수정할 때는 `tutorial/**/README.md`를 편집한다. `drafts/book/`은 안정적인 페이지 ID, 제목, 별칭과 학습 요약을 관리한다. `publish/webbook/`은 빌드할 때마다 생성되는 HTML 결과다.
+
+릴리스 검증 명령인 `make webbook-check`는 웹북 생성 과정을 포함하며 HTML, 검색 색인과 사이트맵을 `publish/webbook/`에 만든다.
+
+```bash
+make webbook-check
+```
+
+`main` 브랜치의 GitHub Pages workflow는 Verilog 전체 예제와 웹북 검증을 통과한 결과를 자동 배포한다.
+
+이 저장소의 검증 범위는 Icarus Verilog 시뮬레이션, `PASS` 판정, VCD와 CSV trace다. 합성과 FPGA 구현은 별도 도구와 검증 단계에서 다룬다.
 
 ## 과제 공개 방식
 
@@ -43,7 +61,7 @@ make test
 
 ## 도구 활용과 결과 책임
 
-학생은 공식 문서, 참고 코드, 생성형 AI 등 수업에서 허용한 도구를 활용할 수 있다. 학생은 자신이 작성하거나 제출한 코드, testbench, 실행 결과와 설명의 정확성을 직접 확인하고 설명할 책임을 가진다.
+학생은 공식 문서, 참고 코드, 생성형 AI 등 수업에서 허용한 도구를 활용할 수 있다. 허용 범위와 제출 규약은 해당 과제의 LMS 공지를 최종 기준으로 삼는다. 학생은 자신이 작성하거나 제출한 코드, testbench, 실행 결과와 설명의 정확성을 직접 확인하고 설명할 책임을 가진다.
 
 ## 공식 문서
 

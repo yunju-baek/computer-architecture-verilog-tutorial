@@ -1,0 +1,24 @@
+{
+  "book": {
+    "title": "컴퓨터구조를 위한 Verilog",
+    "subtitle": "코드를 실행하고 결과를 해석하는 10장 자습서",
+    "slug": "computer-architecture-verilog-tutorial",
+    "description": "Icarus Verilog 실습을 통해 조합논리, 순차논리, 메모리, FSM과 검증을 학습한다.",
+    "repository_url": "https://github.com/yunju-baek/computer-architecture-verilog-tutorial",
+    "site_url": "https://yunju-baek.github.io/computer-architecture-verilog-tutorial/"
+  },
+  "chapters": [
+    {"id": "home", "title": "시작하기", "file": "index.md", "slug": "", "pages": []},
+    {"id": "ch01", "title": "01. 도구와 첫 모듈", "file": "chapters/ch01.md", "slug": "ch01", "pages": []},
+    {"id": "ch02", "title": "02. 문법과 자료형", "file": "chapters/ch02.md", "slug": "ch02", "pages": []},
+    {"id": "ch03", "title": "03. 연산자와 비트 폭", "file": "chapters/ch03.md", "slug": "ch03", "pages": []},
+    {"id": "ch04", "title": "04. 조합논리", "file": "chapters/ch04.md", "slug": "ch04", "pages": []},
+    {"id": "ch05", "title": "05. 순차논리", "file": "chapters/ch05.md", "slug": "ch05", "pages": []},
+    {"id": "ch06", "title": "06. 계층과 파라미터화", "file": "chapters/ch06.md", "slug": "ch06", "pages": []},
+    {"id": "ch07", "title": "07. 메모리와 FSM", "file": "chapters/ch07.md", "slug": "ch07", "pages": []},
+    {"id": "ch08", "title": "08. 자체 검증 testbench", "file": "chapters/ch08.md", "slug": "ch08", "pages": []},
+    {"id": "ch09", "title": "09. 합성 가능 RTL", "file": "chapters/ch09.md", "slug": "ch09", "pages": []},
+    {"id": "ch10", "title": "10. SystemVerilog 대조", "file": "chapters/ch10.md", "slug": "ch10", "pages": []},
+    {"id": "appendix", "title": "부록. 빠른 참조", "file": "appendix/quick-reference.md", "slug": "appendix", "pages": []}
+  ]
+}

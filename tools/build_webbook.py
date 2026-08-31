@@ -1,0 +1,743 @@
+#!/usr/bin/env python3
+"""Build the Verilog tutorial into a searchable static webbook.
+
+The page wrappers under drafts/book contain stable metadata. Each wrapper maps
+to one canonical tutorial README so the repository and website share one body
+of instructional content. The builder uses only the Python standard library.
+"""
+
+from __future__ import annotations
+
+import argparse
+import html
+import json
+import os
+import re
+import shutil
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Callable
+from urllib.parse import quote, unquote
+
+
+ROOT = Path(__file__).resolve().parents[1]
+BOOK_DIR = ROOT / "drafts" / "book"
+TOC_PATH = BOOK_DIR / "toc.yml"
+STYLE_PATH = ROOT / "styles" / "webbook.css"
+SCRIPT_PATH = ROOT / "styles" / "webbook.js"
+FAVICON_PATH = ROOT / "styles" / "favicon.svg"
+PUBLISH_DIR = ROOT / "publish" / "webbook"
+TUTORIAL_DIR = ROOT / "tutorial"
+
+REQUIRED_FIELDS = {
+    "canonical_id",
+    "id",
+    "aliases",
+    "title",
+    "chapter",
+    "type",
+    "status",
+    "topic",
+    "summary",
+    "output",
+    "created",
+    "updated",
+    "related",
+    "source_file",
+}
+
+
+@dataclass(frozen=True)
+class Heading:
+    level: int
+    title: str
+    anchor: str
+
+
+@dataclass
+class Page:
+    id: str
+    title: str
+    wrapper_source: Path
+    content_source: Path
+    slug: str
+    chapter: str
+    summary: str
+    metadata: dict[str, Any]
+    body: str
+
+    @property
+    def output_dir(self) -> Path:
+        return PUBLISH_DIR / self.slug if self.slug else PUBLISH_DIR
+
+    @property
+    def output_path(self) -> Path:
+        return self.output_dir / "index.html"
+
+    @property
+    def site_path(self) -> str:
+        return f"{self.slug}/" if self.slug else ""
+
+
+def is_within(path: Path, parent: Path) -> bool:
+    try:
+        path.relative_to(parent)
+        return True
+    except ValueError:
+        return False
+
+
+def read_toc() -> dict[str, Any]:
+    try:
+        toc = json.loads(TOC_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise SystemExit(f"목차 파일을 읽을 수 없습니다: {exc}") from exc
+    if "book" not in toc or "chapters" not in toc:
+        raise SystemExit("toc.yml에 book과 chapters가 필요합니다.")
+    return toc
+
+
+def flatten_toc(toc: dict[str, Any]) -> list[dict[str, str]]:
+    items: list[dict[str, str]] = []
+    for chapter in toc["chapters"]:
+        items.append(
+            {
+                "id": chapter["id"],
+                "title": chapter["title"],
+                "file": chapter["file"],
+                "slug": chapter["slug"],
+                "chapter": chapter["title"],
+            }
+        )
+        for page in chapter.get("pages", []):
+            items.append(
+                {
+                    "id": page["id"],
+                    "title": page["title"],
+                    "file": page["file"],
+                    "slug": page["slug"],
+                    "chapter": chapter["title"],
+                }
+            )
+    return items
+
+
+def parse_frontmatter(text: str) -> tuple[dict[str, Any], str]:
+    if not text.startswith("---\n"):
+        return {}, text
+    parts = text.split("---", 2)
+    if len(parts) != 3:
+        return {}, text
+    raw_meta, body = parts[1], parts[2]
+    metadata: dict[str, Any] = {}
+    current_key: str | None = None
+    for raw_line in raw_meta.splitlines():
+        line = raw_line.rstrip()
+        if not line:
+            continue
+        if line.startswith("  - ") and current_key:
+            metadata.setdefault(current_key, []).append(line[4:].strip().strip('"'))
+            continue
+        if ":" in line:
+            key, value = line.split(":", 1)
+            key = key.strip()
+            value = value.strip().strip('"')
+            if value:
+                metadata[key] = value
+                current_key = None
+            else:
+                metadata[key] = []
+                current_key = key
+    return metadata, body.lstrip("\n")
+
+
+def load_pages(toc: dict[str, Any]) -> list[Page]:
+    pages: list[Page] = []
+    seen_ids: set[str] = set()
+    seen_aliases: set[str] = set()
+    seen_sources: set[Path] = set()
+    toc_items = flatten_toc(toc)
+
+    for item in toc_items:
+        wrapper_source = (BOOK_DIR / item["file"]).resolve()
+        if not is_within(wrapper_source, BOOK_DIR):
+            raise SystemExit(f"목차 경로가 drafts/book 범위를 벗어났습니다: {item['file']}")
+        if not wrapper_source.is_file():
+            raise SystemExit(f"목차에 등록된 페이지가 없습니다: {wrapper_source}")
+
+        metadata, wrapper_body = parse_frontmatter(wrapper_source.read_text(encoding="utf-8"))
+        missing = REQUIRED_FIELDS - metadata.keys()
+        if missing:
+            fields = ", ".join(sorted(missing))
+            raise SystemExit(f"{wrapper_source} frontmatter 필드가 필요합니다: {fields}")
+        if wrapper_body.strip():
+            raise SystemExit(f"메타데이터 페이지 본문은 비워 둡니다: {wrapper_source}")
+
+        page_id = str(metadata["id"])
+        if page_id != item["id"]:
+            raise SystemExit(f"toc id와 frontmatter id가 다릅니다: {item['id']} / {page_id}")
+        if page_id in seen_ids:
+            raise SystemExit(f"중복 페이지 id: {page_id}")
+        seen_ids.add(page_id)
+
+        aliases = metadata.get("aliases", [])
+        aliases = [aliases] if isinstance(aliases, str) else aliases
+        for alias in aliases:
+            if alias in seen_aliases or alias in seen_ids:
+                raise SystemExit(f"별칭이 충돌합니다: {wrapper_source} / {alias}")
+            seen_aliases.add(alias)
+
+        content_source = (ROOT / str(metadata["source_file"])).resolve()
+        if not is_within(content_source, TUTORIAL_DIR):
+            raise SystemExit(f"웹북 본문은 tutorial/ 범위에서 읽습니다: {content_source}")
+        if not content_source.is_file():
+            raise SystemExit(f"웹북 본문 파일이 없습니다: {content_source}")
+        if content_source in seen_sources:
+            raise SystemExit(f"웹북 본문이 중복 연결되었습니다: {content_source}")
+        seen_sources.add(content_source)
+
+        pages.append(
+            Page(
+                id=page_id,
+                title=str(metadata.get("title", item["title"])),
+                wrapper_source=wrapper_source,
+                content_source=content_source,
+                slug=item["slug"].strip("/"),
+                chapter=str(metadata.get("chapter", item["chapter"])),
+                summary=str(metadata.get("summary", "")),
+                metadata=metadata,
+                body=content_source.read_text(encoding="utf-8"),
+            )
+        )
+
+    known_wrappers = {(BOOK_DIR / item["file"]).resolve() for item in toc_items}
+    extra_wrappers = sorted(path for path in BOOK_DIR.rglob("*.md") if path.resolve() not in known_wrappers)
+    if extra_wrappers:
+        names = ", ".join(path.relative_to(ROOT).as_posix() for path in extra_wrappers)
+        raise SystemExit(f"toc.yml에 등록할 Markdown 페이지가 있습니다: {names}")
+    return pages
+
+
+def slugify_heading(text: str) -> str:
+    plain = re.sub(r"`([^`]+)`", r"\1", text)
+    plain = re.sub(r"<[^>]+>", "", plain)
+    plain = re.sub(r"[^\w가-힣\- ]+", "", plain).strip().lower()
+    return re.sub(r"\s+", "-", plain) or "section"
+
+
+def split_table_row(line: str) -> list[str]:
+    row = line.strip()
+    if row.startswith("|"):
+        row = row[1:]
+    if row.endswith("|"):
+        row = row[:-1]
+    cells: list[str] = []
+    current: list[str] = []
+    in_code = False
+    escaped = False
+    for char in row:
+        if escaped:
+            current.append(char)
+            escaped = False
+            continue
+        if char == "\\":
+            current.append(char)
+            escaped = True
+            continue
+        if char == "`":
+            in_code = not in_code
+            current.append(char)
+            continue
+        if char == "|" and not in_code:
+            cells.append("".join(current).strip())
+            current = []
+            continue
+        current.append(char)
+    cells.append("".join(current).strip())
+    return cells
+
+
+def is_table_separator(line: str) -> bool:
+    cells = split_table_row(line)
+    return bool(cells) and all(re.fullmatch(r":?-{3,}:?", cell.replace(" ", "")) for cell in cells)
+
+
+def inline_markdown(text: str, rewrite_href: Callable[[str], str]) -> str:
+    code_tokens: list[str] = []
+    link_tokens: list[str] = []
+
+    def protect_code(match: re.Match[str]) -> str:
+        token = f"@@WB_CODE_{len(code_tokens)}@@"
+        code_tokens.append(f"<code>{html.escape(match.group(1))}</code>")
+        return token
+
+    protected = re.sub(r"`([^`]+)`", protect_code, text)
+
+    def protect_link(match: re.Match[str]) -> str:
+        token = f"@@WB_LINK_{len(link_tokens)}@@"
+        label = html.escape(match.group(1))
+        href = html.escape(rewrite_href(match.group(2)), quote=True)
+        external = ' target="_blank" rel="noopener"' if href.startswith(("http://", "https://")) else ""
+        link_tokens.append(f'<a href="{href}"{external}>{label}</a>')
+        return token
+
+    protected = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", protect_link, protected)
+    rendered = html.escape(protected)
+    rendered = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", rendered)
+    rendered = re.sub(r"(?<!\*)\*([^*]+)\*(?!\*)", r"<em>\1</em>", rendered)
+    for index, value in enumerate(link_tokens):
+        rendered = rendered.replace(f"@@WB_LINK_{index}@@", value)
+    for index, value in enumerate(code_tokens):
+        rendered = rendered.replace(f"@@WB_CODE_{index}@@", value)
+    return rendered
+
+
+def markdown_to_html(
+    markdown: str,
+    rewrite_href: Callable[[str], str],
+) -> tuple[str, list[Heading]]:
+    lines = markdown.splitlines()
+    out: list[str] = []
+    headings: list[Heading] = []
+    heading_counts: dict[str, int] = {}
+    index = 0
+    in_ul = False
+    in_ol = False
+    in_code = False
+    code_language = "text"
+    code_lines: list[str] = []
+
+    def close_lists() -> None:
+        nonlocal in_ul, in_ol
+        if in_ul:
+            out.append("</ul>")
+            in_ul = False
+        if in_ol:
+            out.append("</ol>")
+            in_ol = False
+
+    def starts_block(line: str, next_line: str = "") -> bool:
+        stripped = line.strip()
+        return bool(
+            not stripped
+            or stripped.startswith("```")
+            or re.match(r"^#{1,6}\s+", stripped)
+            or stripped in {"---", "***", "___"}
+            or stripped.startswith(("- ", "* ", "> "))
+            or re.match(r"^\d+\.\s+", stripped)
+            or (stripped.startswith("|") and is_table_separator(next_line.strip()))
+        )
+
+    while index < len(lines):
+        line = lines[index]
+        stripped = line.strip()
+
+        if stripped.startswith("```"):
+            if in_code:
+                code_html = html.escape("\n".join(code_lines))
+                language = html.escape(code_language or "text")
+                out.append(
+                    '<div class="code-shell">'
+                    '<button class="copy-code" type="button">복사</button>'
+                    f'<pre><code class="language-{language}">{code_html}</code></pre>'
+                    "</div>"
+                )
+                in_code = False
+                code_lines = []
+            else:
+                close_lists()
+                in_code = True
+                code_language = stripped[3:].strip() or "text"
+            index += 1
+            continue
+
+        if in_code:
+            code_lines.append(line)
+            index += 1
+            continue
+
+        if not stripped:
+            close_lists()
+            index += 1
+            continue
+
+        if stripped in {"---", "***", "___"}:
+            close_lists()
+            out.append("<hr>")
+            index += 1
+            continue
+
+        if stripped.startswith("|") and index + 1 < len(lines) and is_table_separator(lines[index + 1].strip()):
+            close_lists()
+            table_lines = [stripped]
+            index += 2
+            while index < len(lines) and lines[index].strip().startswith("|"):
+                table_lines.append(lines[index].strip())
+                index += 1
+            header = split_table_row(table_lines[0])
+            rows = [split_table_row(row) for row in table_lines[1:]]
+            out.append('<div class="table-scroll"><table><thead><tr>')
+            out.extend(f"<th>{inline_markdown(cell, rewrite_href)}</th>" for cell in header)
+            out.append("</tr></thead><tbody>")
+            for row in rows:
+                normalized = row + [""] * max(0, len(header) - len(row))
+                out.append("<tr>")
+                out.extend(f"<td>{inline_markdown(cell, rewrite_href)}</td>" for cell in normalized[: len(header)])
+                out.append("</tr>")
+            out.append("</tbody></table></div>")
+            continue
+
+        heading_match = re.match(r"^(#{1,6})\s+(.+)$", stripped)
+        if heading_match:
+            close_lists()
+            level = len(heading_match.group(1))
+            title = heading_match.group(2).strip()
+            base_anchor = slugify_heading(title)
+            count = heading_counts.get(base_anchor, 0) + 1
+            heading_counts[base_anchor] = count
+            anchor = base_anchor if count == 1 else f"{base_anchor}-{count}"
+            headings.append(Heading(level=level, title=re.sub(r"`", "", title), anchor=anchor))
+            out.append(
+                f'<h{level} id="{html.escape(anchor)}">'
+                f'{inline_markdown(title, rewrite_href)}'
+                f'<a class="heading-anchor" href="#{html.escape(anchor)}" aria-label="이 절 링크">#</a>'
+                f"</h{level}>"
+            )
+            index += 1
+            continue
+
+        if stripped.startswith("> "):
+            close_lists()
+            quote_lines: list[str] = []
+            while index < len(lines) and lines[index].strip().startswith(">"):
+                quote_lines.append(lines[index].strip().lstrip(">").strip())
+                index += 1
+            content = " ".join(quote_lines)
+            out.append(f"<blockquote>{inline_markdown(content, rewrite_href)}</blockquote>")
+            continue
+
+        checkbox_match = re.match(r"^[-*]\s+\[([ xX])\]\s+(.+)$", stripped)
+        if checkbox_match:
+            if not in_ul:
+                close_lists()
+                out.append('<ul class="checklist">')
+                in_ul = True
+            checked = " checked" if checkbox_match.group(1).lower() == "x" else ""
+            out.append(
+                f'<li><input type="checkbox" disabled{checked}> '
+                f'{inline_markdown(checkbox_match.group(2), rewrite_href)}</li>'
+            )
+            index += 1
+            continue
+
+        unordered_match = re.match(r"^[-*]\s+(.+)$", stripped)
+        if unordered_match:
+            if not in_ul:
+                close_lists()
+                out.append("<ul>")
+                in_ul = True
+            out.append(f"<li>{inline_markdown(unordered_match.group(1), rewrite_href)}</li>")
+            index += 1
+            continue
+
+        ordered_match = re.match(r"^\d+\.\s+(.+)$", stripped)
+        if ordered_match:
+            if not in_ol:
+                close_lists()
+                out.append("<ol>")
+                in_ol = True
+            out.append(f"<li>{inline_markdown(ordered_match.group(1), rewrite_href)}</li>")
+            index += 1
+            continue
+
+        close_lists()
+        paragraph = [stripped]
+        index += 1
+        while index < len(lines):
+            next_line = lines[index]
+            after_next = lines[index + 1] if index + 1 < len(lines) else ""
+            if starts_block(next_line, after_next):
+                break
+            paragraph.append(next_line.strip())
+            index += 1
+        out.append(f"<p>{inline_markdown(' '.join(paragraph), rewrite_href)}</p>")
+
+    if in_code:
+        raise SystemExit("닫는 ```가 필요한 코드 블록이 있습니다.")
+    close_lists()
+    return "\n".join(out), headings
+
+
+def relative_link(from_page: Page, to_page: Page) -> str:
+    value = os.path.relpath(to_page.output_path, from_page.output_dir)
+    return value.replace(os.sep, "/")
+
+
+def source_url(toc: dict[str, Any], source: Path) -> str:
+    repository = str(toc["book"]["repository_url"]).rstrip("/")
+    relative = source.relative_to(ROOT).as_posix()
+    return f"{repository}/blob/main/{quote(relative, safe='/')}"
+
+
+def make_link_rewriter(
+    toc: dict[str, Any],
+    current: Page,
+    page_by_content: dict[Path, Page],
+) -> Callable[[str], str]:
+    def rewrite(href: str) -> str:
+        if href.startswith(("http://", "https://", "mailto:", "#")):
+            return href
+        path_part, separator, fragment = href.partition("#")
+        target = (current.content_source.parent / unquote(path_part)).resolve()
+        if target in page_by_content:
+            page_href = relative_link(current, page_by_content[target])
+            return f"{page_href}#{fragment}" if separator else page_href
+        if target.is_file() and is_within(target, ROOT):
+            return source_url(toc, target) + (f"#{fragment}" if separator else "")
+        return href
+
+    return rewrite
+
+
+def render_sidebar(toc: dict[str, Any], current: Page, page_by_wrapper: dict[str, Page]) -> str:
+    home = page_by_wrapper["index.md"]
+    parts = [
+        f'<a class="book-title" href="{relative_link(current, home)}">{html.escape(toc["book"]["title"])}</a>',
+        f'<p class="book-subtitle">{html.escape(toc["book"].get("subtitle", ""))}</p>',
+        '<div class="search-box">',
+        '<label for="book-search">웹북 검색</label>',
+        '<input id="book-search" type="search" placeholder="예: always, FSM, VCD" autocomplete="off">',
+        '<div id="search-results" class="search-results" aria-live="polite"></div>',
+        "</div>",
+        '<nav class="toc" aria-label="웹북 목차">',
+    ]
+    for chapter in toc["chapters"]:
+        page = page_by_wrapper[chapter["file"]]
+        active = " active" if page.id == current.id else ""
+        current_attr = ' aria-current="page"' if active else ""
+        parts.append(
+            f'<a class="toc-link{active}" href="{relative_link(current, page)}"{current_attr}>'
+            f'{html.escape(chapter["title"])}</a>'
+        )
+    parts.extend(
+        [
+            "</nav>",
+            '<div class="sidebar-meta">',
+            f'<a href="{html.escape(toc["book"]["repository_url"])}" target="_blank" rel="noopener">GitHub 저장소</a>',
+            "</div>",
+        ]
+    )
+    return "\n".join(parts)
+
+
+def render_section_toc(headings: list[Heading]) -> str:
+    items = [heading for heading in headings if heading.level in {2, 3}]
+    if not items:
+        return ""
+    links = [
+        f'<a class="level-{heading.level}" href="#{html.escape(heading.anchor)}">{html.escape(heading.title)}</a>'
+        for heading in items
+    ]
+    return '<nav class="section-toc" aria-label="이 페이지 목차"><strong>이 페이지에서</strong>' + "".join(links) + "</nav>"
+
+
+def render_page(
+    toc: dict[str, Any],
+    pages: list[Page],
+    index: int,
+    page_by_wrapper: dict[str, Page],
+    page_by_content: dict[Path, Page],
+) -> str:
+    page = pages[index]
+    previous = pages[index - 1] if index > 0 else None
+    following = pages[index + 1] if index + 1 < len(pages) else None
+    rewrite_href = make_link_rewriter(toc, page, page_by_content)
+    content, headings = markdown_to_html(page.body, rewrite_href)
+    style_href = os.path.relpath(PUBLISH_DIR / "webbook.css", page.output_dir).replace(os.sep, "/")
+    script_href = os.path.relpath(PUBLISH_DIR / "webbook.js", page.output_dir).replace(os.sep, "/")
+    favicon_href = os.path.relpath(PUBLISH_DIR / "favicon.svg", page.output_dir).replace(os.sep, "/")
+    search_href = os.path.relpath(PUBLISH_DIR / "search-index.json", page.output_dir).replace(os.sep, "/")
+    site_root = os.path.relpath(PUBLISH_DIR, page.output_dir).replace(os.sep, "/")
+    site_root = "./" if site_root == "." else f"{site_root}/"
+    canonical = f"{toc['book']['site_url'].rstrip('/')}/{page.site_path}"
+
+    page_nav = ['<nav class="page-nav" aria-label="페이지 이동">']
+    if previous:
+        page_nav.append(
+            f'<a href="{relative_link(page, previous)}"><span>이전 장</span>{html.escape(previous.title)}</a>'
+        )
+    else:
+        page_nav.append("<div></div>")
+    if following:
+        page_nav.append(
+            f'<a class="next" href="{relative_link(page, following)}"><span>다음 장</span>{html.escape(following.title)}</a>'
+        )
+    else:
+        page_nav.append("<div></div>")
+    page_nav.append("</nav>")
+
+    return f"""<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{html.escape(page.title)} · {html.escape(toc["book"]["title"])}</title>
+  <meta name="description" content="{html.escape(page.summary, quote=True)}">
+  <link rel="canonical" href="{html.escape(canonical, quote=True)}">
+  <link rel="icon" href="{html.escape(favicon_href, quote=True)}" type="image/svg+xml">
+  <link rel="stylesheet" href="{html.escape(style_href, quote=True)}">
+  <script src="{html.escape(script_href, quote=True)}" defer></script>
+</head>
+<body data-search-index="{html.escape(search_href, quote=True)}" data-site-root="{html.escape(site_root, quote=True)}">
+  <div class="site-shell">
+    <aside class="sidebar" id="sidebar">
+      {render_sidebar(toc, page, page_by_wrapper)}
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <button class="menu-button" type="button" aria-controls="sidebar" aria-expanded="false">목차</button>
+        <div class="crumb">{html.escape(page.chapter)} · {html.escape(page.title)}</div>
+        <a class="top-source" href="{html.escape(source_url(toc, page.content_source), quote=True)}" target="_blank" rel="noopener">원본 보기</a>
+      </header>
+      <div class="content-layout">
+        <div class="content-wrap">
+          <p class="summary">{html.escape(page.summary)}</p>
+          <div class="learning-actions">
+            <span>실행 흐름</span>
+            <code>make test</code>
+            <span>→</span>
+            <code>PASS</code>
+            <span>→ 결과 해석</span>
+          </div>
+          <article>
+            {content}
+          </article>
+          {''.join(page_nav)}
+          <footer class="footer">
+            <span>본문 원본: {html.escape(page.content_source.relative_to(ROOT).as_posix())}</span>
+            <a href="{html.escape(source_url(toc, page.content_source), quote=True)}" target="_blank" rel="noopener">GitHub에서 편집 제안</a>
+          </footer>
+        </div>
+        {render_section_toc(headings)}
+      </div>
+    </main>
+  </div>
+</body>
+</html>
+"""
+
+
+def plain_search_text(markdown: str) -> str:
+    text = re.sub(r"```.*?```", " ", markdown, flags=re.DOTALL)
+    text = re.sub(r"`([^`]+)`", r"\1", text)
+    text = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", text)
+    text = re.sub(r"[#>*_|\-]+", " ", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def validate_generated_links() -> None:
+    missing: list[str] = []
+    for html_path in PUBLISH_DIR.rglob("*.html"):
+        source = html_path.read_text(encoding="utf-8")
+        for href in re.findall(r'(?:href|src)="([^"]+)"', source):
+            if href.startswith(("http://", "https://", "mailto:", "#", "data:")):
+                continue
+            href_path = unquote(href.split("#", 1)[0].split("?", 1)[0])
+            if not href_path:
+                continue
+            target = (html_path.parent / href_path).resolve()
+            if not target.exists():
+                missing.append(f"{html_path.relative_to(ROOT)} -> {href}")
+    if missing:
+        raise SystemExit("생성된 HTML에 끊어진 링크가 있습니다:\n" + "\n".join(missing))
+
+
+def write_support_files(toc: dict[str, Any], pages: list[Page]) -> None:
+    search_index = [
+        {
+            "id": page.id,
+            "title": page.title,
+            "summary": page.summary,
+            "url": page.site_path,
+            "chapter": page.chapter,
+            "text": plain_search_text(page.body),
+        }
+        for page in pages
+    ]
+    (PUBLISH_DIR / "search-index.json").write_text(
+        json.dumps(search_index, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
+    build_info = {
+        "title": toc["book"]["title"],
+        "version": version,
+        "pages": len(pages),
+        "source": "tutorial/**/README.md",
+    }
+    (PUBLISH_DIR / "build-info.json").write_text(
+        json.dumps(build_info, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    site_url = str(toc["book"]["site_url"]).rstrip("/")
+    sitemap_urls = "\n".join(f"  <url><loc>{site_url}/{page.site_path}</loc></url>" for page in pages)
+    (PUBLISH_DIR / "sitemap.xml").write_text(
+        f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{sitemap_urls}\n</urlset>\n',
+        encoding="utf-8",
+    )
+    (PUBLISH_DIR / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {site_url}/sitemap.xml\n", encoding="utf-8")
+    (PUBLISH_DIR / ".nojekyll").write_text("", encoding="utf-8")
+
+
+def build() -> None:
+    toc = read_toc()
+    pages = load_pages(toc)
+    page_by_wrapper = {page.wrapper_source.relative_to(BOOK_DIR).as_posix(): page for page in pages}
+    page_by_content = {page.content_source.resolve(): page for page in pages}
+
+    if PUBLISH_DIR.exists():
+        shutil.rmtree(PUBLISH_DIR)
+    PUBLISH_DIR.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(STYLE_PATH, PUBLISH_DIR / "webbook.css")
+    shutil.copy2(SCRIPT_PATH, PUBLISH_DIR / "webbook.js")
+    shutil.copy2(FAVICON_PATH, PUBLISH_DIR / "favicon.svg")
+
+    for index, page in enumerate(pages):
+        page.output_dir.mkdir(parents=True, exist_ok=True)
+        rendered = render_page(toc, pages, index, page_by_wrapper, page_by_content)
+        page.output_path.write_text(rendered, encoding="utf-8")
+
+    write_support_files(toc, pages)
+    validate_generated_links()
+    print(f"PASS webbook: {len(pages)} pages -> {PUBLISH_DIR}")
+
+
+def configure_paths(args: argparse.Namespace) -> None:
+    global ROOT, BOOK_DIR, TOC_PATH, STYLE_PATH, SCRIPT_PATH, FAVICON_PATH, PUBLISH_DIR, TUTORIAL_DIR
+    ROOT = Path(args.root).resolve()
+    BOOK_DIR = (ROOT / args.book_dir).resolve()
+    TOC_PATH = (ROOT / args.toc).resolve()
+    STYLE_PATH = (ROOT / args.style).resolve()
+    SCRIPT_PATH = (ROOT / args.script).resolve()
+    FAVICON_PATH = (ROOT / args.favicon).resolve()
+    PUBLISH_DIR = (ROOT / args.output).resolve()
+    TUTORIAL_DIR = (ROOT / "tutorial").resolve()
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Verilog 자습서를 정적 웹북으로 생성합니다.")
+    parser.add_argument("--root", default=".", help="저장소 루트")
+    parser.add_argument("--book-dir", default="drafts/book", help="웹북 메타데이터 디렉터리")
+    parser.add_argument("--toc", default="drafts/book/toc.yml", help="JSON 호환 목차 파일")
+    parser.add_argument("--style", default="styles/webbook.css", help="웹북 CSS")
+    parser.add_argument("--script", default="styles/webbook.js", help="웹북 JavaScript")
+    parser.add_argument("--favicon", default="styles/favicon.svg", help="웹북 favicon")
+    parser.add_argument("--output", default="publish/webbook", help="생성 결과 디렉터리")
+    parser.add_argument("--check", action="store_true", help="생성 및 전체 검증 실행")
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    arguments = parse_args()
+    configure_paths(arguments)
+    build()

@@ -7,3 +7,7 @@ evidence/
 *.log
 __pycache__/
 *.py[cod]
+publish/webbook/
+.playwright-cli/
+output/playwright/
+.re0/

@@ -1,10 +1,15 @@
 {
   "repository": "yunju-baek/computer-architecture-verilog-tutorial",
-  "release_profile": "tutorial-only",
-  "version": "tutorial-1.0.0",
-  "published": ["tutorial"],
+  "release_profile": "tutorial-webbook",
+  "version": "tutorial-1.1.0",
+  "published": ["tutorial", "webbook"],
   "assignments": [],
   "assignment_release_policy": "Add each assignment to the public Git history at its announced release time.",
+  "webbook": {
+    "pages": 12,
+    "source": "tutorial/**/README.md",
+    "url": "https://yunju-baek.github.io/computer-architecture-verilog-tutorial/"
+  },
   "toolchain": {
     "iverilog_mode": "-g2012",
     "student_rtl": "Verilog-2001 core subset",
