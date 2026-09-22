@@ -4,6 +4,7 @@
 
 - [웹북](https://yunju-baek.github.io/computer-architecture-verilog-tutorial/)
 - [실행형 튜토리얼](tutorial/README.md)
+- [점검 과제 1·2](check_packet/README.md)
 - [과제 공개 현황](assignments/README.md)
 
 ## 유지관리 경로

@@ -36,6 +36,7 @@ make test
 | `make webbook-check` | Python 문법, 새 웹북 빌드와 페이지 수 검증 |
 | `make clean` | Verilog와 웹북 생성물 정리 |
 | `make package-check` | 공개 패키지, 전체 예제와 웹북 검증 |
+| `make check-packet-verify` | 점검 과제 probe 10개의 컴파일 확인 |
 
 세부 목차와 권장 학습 순서는 [tutorial/README.md](tutorial/README.md)에서 확인한다.
 
@@ -58,6 +59,18 @@ make webbook-check
 과제 자료는 수업 진도와 LMS 공지에 맞추어 [`assignments/`](assignments/README.md)에 순차적으로 추가한다. 공개된 과제는 저장소의 commit과 Git tag로 버전을 고정한다.
 
 공개 전 과제의 starter code와 testbench는 교수자 관리 저장소에서 보관한다. 이 공개 저장소의 Git 이력에는 공개 시점부터 해당 과제 파일을 추가한다.
+
+## 점검 과제
+
+자습서 CH01–CH05, CH06–CH10의 설명 수업 뒤에 제출하는 점검 과제 2개가 [`check_packet/`](check_packet/README.md)에 있다. 각 점검은 `make setup-check`로 도구 설치를 확인하고, 해당 구간 5개 장의 `make test`를 실행한 뒤, 학번에서 파생된 입력에 대한 예상값을 `predictions.vh`에 적어 실행 결과와 대조한다. `make package`가 제출용 zip을 만든다.
+
+```bash
+cd check_packet/check1
+make setup-check
+make show-inputs
+make test
+make package
+```
 
 ## 도구 활용과 결과 책임
 

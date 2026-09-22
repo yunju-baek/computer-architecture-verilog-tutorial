@@ -1,4 +1,4 @@
-.PHONY: help setup-check tutorial test errors waves webbook webbook-check clean package-check
+.PHONY: help setup-check tutorial test errors waves webbook webbook-check check-packet-verify clean package-check
 
 help:
 	@echo 'make setup-check   # Icarus Verilog 도구 확인'
@@ -9,6 +9,7 @@ help:
 	@echo 'make webbook-check # 웹북 구조와 링크 검증'
 	@echo 'make clean         # 생성물 정리'
 	@echo 'make package-check # 공개 패키지 검증'
+	@echo 'make check-packet-verify # 점검 과제 probe 컴파일 확인'
 
 setup-check:
 	$(MAKE) --no-print-directory -C tutorial setup-check
@@ -33,6 +34,16 @@ webbook-check:
 	@test "$$(find publish/webbook -name index.html | wc -l | tr -d ' ')" = 12
 	@echo 'PASS webbook package'
 
+check-packet-verify:
+	@for c in 1 2; do \
+	  for p in check_packet/check$$c/probes/*.v; do \
+	    n=$$(basename $$p .v); ch=$${n#probe_}; \
+	    duts=$$(sed -n "s/^DUT_$$ch *:= *//p" check_packet/check$$c/Makefile | sed 's#$$(TUTORIAL)#tutorial#g'); \
+	    iverilog -g2012 -Wall -I check_packet/common -I check_packet/check$$c -s $$n -o /dev/null $$duts $$p || exit 1; \
+	  done; \
+	done
+	@echo 'PASS check_packet probes compile'
+
 clean:
 	$(MAKE) --no-print-directory -C tutorial clean
 	$(RM) -r publish/webbook tools/__pycache__
@@ -46,4 +57,5 @@ package-check:
 	@test -z "$$(find assignments -mindepth 1 -maxdepth 1 -type d -print -quit)"
 	@$(MAKE) --no-print-directory test
 	@$(MAKE) --no-print-directory webbook-check
+	@$(MAKE) --no-print-directory check-packet-verify
 	@echo 'PASS public tutorial and webbook package'
