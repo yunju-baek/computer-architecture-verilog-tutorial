@@ -4,14 +4,19 @@
   "version": "tutorial-1.2.0",
   "published": [
     "tutorial",
+    "tutorial_en",
     "webbook",
     "check_packet"
   ],
   "assignments": [],
   "assignment_release_policy": "Add each assignment to the public Git history at its announced release time.",
   "webbook": {
-    "pages": 12,
-    "source": "tutorial/**/README.md",
+    "pages": 24,
+    "languages": [
+      "ko",
+      "en"
+    ],
+    "source": "tutorial/**/README.md, tutorial_en/**/README.md",
     "url": "https://yunju-baek.github.io/computer-architecture-verilog-tutorial/"
   },
   "toolchain": {

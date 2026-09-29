@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Build the Verilog tutorial into a searchable static webbook.
+"""Build the Verilog tutorial into a searchable bilingual static webbook.
 
-The page wrappers under drafts/book contain stable metadata. Each wrapper maps
-to one canonical tutorial README so the repository and website share one body
-of instructional content. The builder uses only the Python standard library.
+The page wrappers under drafts/book (Korean) and drafts/book/en (English) contain
+stable metadata. Each wrapper maps to one canonical tutorial README (under tutorial/
+or tutorial_en/) so the repository and website share one body of instructional content.
+The builder uses only the Python standard library.
 """
 
 from __future__ import annotations
@@ -22,12 +23,15 @@ from urllib.parse import quote, unquote
 
 ROOT = Path(__file__).resolve().parents[1]
 BOOK_DIR = ROOT / "drafts" / "book"
+EN_BOOK_DIR = BOOK_DIR / "en"
 TOC_PATH = BOOK_DIR / "toc.yml"
+EN_TOC_PATH = EN_BOOK_DIR / "toc.yml"
 STYLE_PATH = ROOT / "styles" / "webbook.css"
 SCRIPT_PATH = ROOT / "styles" / "webbook.js"
 FAVICON_PATH = ROOT / "styles" / "favicon.svg"
 PUBLISH_DIR = ROOT / "publish" / "webbook"
 TUTORIAL_DIR = ROOT / "tutorial"
+TUTORIAL_EN_DIR = ROOT / "tutorial_en"
 
 REQUIRED_FIELDS = {
     "canonical_id",
@@ -44,6 +48,57 @@ REQUIRED_FIELDS = {
     "updated",
     "related",
     "source_file",
+}
+
+I18N: dict[str, dict[str, str]] = {
+    "ko": {
+        "lang_code": "ko",
+        "lang_name": "한국어",
+        "alt_lang_code": "en",
+        "alt_lang_name": "English",
+        "lang_switch_label": "언어 선택 / Language",
+        "menu": "목차",
+        "search_label": "웹북 검색",
+        "search_placeholder": "예: always, FSM, VCD",
+        "search_empty": "검색 결과가 없습니다.",
+        "search_ready": "검색 색인 준비 중",
+        "copy": "복사",
+        "copied": "복사됨",
+        "section_toc": "이 페이지에서",
+        "section_link": "이 절 링크",
+        "prev": "이전 장",
+        "next": "다음 장",
+        "exec_flow": "실행 흐름",
+        "interpret": "결과 해석",
+        "source_view": "원본 보기",
+        "source_edit": "GitHub에서 편집 제안",
+        "source_prefix": "본문 원본: ",
+        "repo_link": "GitHub 저장소",
+    },
+    "en": {
+        "lang_code": "en",
+        "lang_name": "English",
+        "alt_lang_code": "ko",
+        "alt_lang_name": "한국어",
+        "lang_switch_label": "Language / 언어 선택",
+        "menu": "Contents",
+        "search_label": "Search Webbook",
+        "search_placeholder": "e.g., always, FSM, VCD",
+        "search_empty": "No results found.",
+        "search_ready": "Loading search index",
+        "copy": "Copy",
+        "copied": "Copied",
+        "section_toc": "On this page",
+        "section_link": "Link to section",
+        "prev": "Previous",
+        "next": "Next",
+        "exec_flow": "Execution Flow",
+        "interpret": "Interpret Results",
+        "source_view": "View Source",
+        "source_edit": "Suggest edits on GitHub",
+        "source_prefix": "Source: ",
+        "repo_link": "GitHub Repository",
+    },
 }
 
 
@@ -65,10 +120,15 @@ class Page:
     summary: str
     metadata: dict[str, Any]
     body: str
+    lang: str = "ko"
+
+    @property
+    def base_publish_dir(self) -> Path:
+        return PUBLISH_DIR / "en" if self.lang == "en" else PUBLISH_DIR
 
     @property
     def output_dir(self) -> Path:
-        return PUBLISH_DIR / self.slug if self.slug else PUBLISH_DIR
+        return self.base_publish_dir / self.slug if self.slug else self.base_publish_dir
 
     @property
     def output_path(self) -> Path:
@@ -76,7 +136,8 @@ class Page:
 
     @property
     def site_path(self) -> str:
-        return f"{self.slug}/" if self.slug else ""
+        prefix = "en/" if self.lang == "en" else ""
+        return f"{prefix}{self.slug}/" if self.slug else prefix
 
 
 def is_within(path: Path, parent: Path) -> bool:
@@ -87,13 +148,13 @@ def is_within(path: Path, parent: Path) -> bool:
         return False
 
 
-def read_toc() -> dict[str, Any]:
+def read_toc(path: Path) -> dict[str, Any]:
     try:
-        toc = json.loads(TOC_PATH.read_text(encoding="utf-8"))
+        toc = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
-        raise SystemExit(f"목차 파일을 읽을 수 없습니다: {exc}") from exc
+        raise SystemExit(f"목차 파일을 읽을 수 없습니다: {path} ({exc})") from exc
     if "book" not in toc or "chapters" not in toc:
-        raise SystemExit("toc.yml에 book과 chapters가 필요합니다.")
+        raise SystemExit(f"{path}에 book과 chapters가 필요합니다.")
     return toc
 
 
@@ -151,7 +212,12 @@ def parse_frontmatter(text: str) -> tuple[dict[str, Any], str]:
     return metadata, body.lstrip("\n")
 
 
-def load_pages(toc: dict[str, Any]) -> list[Page]:
+def load_pages(
+    book_dir: Path,
+    toc: dict[str, Any],
+    content_parent: Path,
+    lang: str = "ko",
+) -> list[Page]:
     pages: list[Page] = []
     seen_ids: set[str] = set()
     seen_aliases: set[str] = set()
@@ -159,9 +225,9 @@ def load_pages(toc: dict[str, Any]) -> list[Page]:
     toc_items = flatten_toc(toc)
 
     for item in toc_items:
-        wrapper_source = (BOOK_DIR / item["file"]).resolve()
-        if not is_within(wrapper_source, BOOK_DIR):
-            raise SystemExit(f"목차 경로가 drafts/book 범위를 벗어났습니다: {item['file']}")
+        wrapper_source = (book_dir / item["file"]).resolve()
+        if not is_within(wrapper_source, book_dir):
+            raise SystemExit(f"목차 경로가 {book_dir} 범위를 벗어났습니다: {item['file']}")
         if not wrapper_source.is_file():
             raise SystemExit(f"목차에 등록된 페이지가 없습니다: {wrapper_source}")
 
@@ -188,8 +254,8 @@ def load_pages(toc: dict[str, Any]) -> list[Page]:
             seen_aliases.add(alias)
 
         content_source = (ROOT / str(metadata["source_file"])).resolve()
-        if not is_within(content_source, TUTORIAL_DIR):
-            raise SystemExit(f"웹북 본문은 tutorial/ 범위에서 읽습니다: {content_source}")
+        if not is_within(content_source, content_parent):
+            raise SystemExit(f"웹북 본문은 {content_parent} 범위에서 읽습니다: {content_source}")
         if not content_source.is_file():
             raise SystemExit(f"웹북 본문 파일이 없습니다: {content_source}")
         if content_source in seen_sources:
@@ -207,14 +273,19 @@ def load_pages(toc: dict[str, Any]) -> list[Page]:
                 summary=str(metadata.get("summary", "")),
                 metadata=metadata,
                 body=content_source.read_text(encoding="utf-8"),
+                lang=lang,
             )
         )
 
-    known_wrappers = {(BOOK_DIR / item["file"]).resolve() for item in toc_items}
-    extra_wrappers = sorted(path for path in BOOK_DIR.rglob("*.md") if path.resolve() not in known_wrappers)
+    known_wrappers = {(book_dir / item["file"]).resolve() for item in toc_items}
+    extra_wrappers = sorted(
+        path
+        for path in book_dir.rglob("*.md")
+        if path.resolve() not in known_wrappers and (lang != "ko" or "en" not in path.parts)
+    )
     if extra_wrappers:
         names = ", ".join(path.relative_to(ROOT).as_posix() for path in extra_wrappers)
-        raise SystemExit(f"toc.yml에 등록할 Markdown 페이지가 있습니다: {names}")
+        raise SystemExit(f"{book_dir}에 등록할 Markdown 페이지가 있습니다: {names}")
     return pages
 
 
@@ -295,6 +366,7 @@ def inline_markdown(text: str, rewrite_href: Callable[[str], str]) -> str:
 def markdown_to_html(
     markdown: str,
     rewrite_href: Callable[[str], str],
+    lang: str = "ko",
 ) -> tuple[str, list[Heading]]:
     lines = markdown.splitlines()
     out: list[str] = []
@@ -306,6 +378,7 @@ def markdown_to_html(
     in_code = False
     code_language = "text"
     code_lines: list[str] = []
+    copy_label = I18N[lang]["copy"]
 
     def close_lists() -> None:
         nonlocal in_ul, in_ol
@@ -338,7 +411,7 @@ def markdown_to_html(
                 language = html.escape(code_language or "text")
                 out.append(
                     '<div class="code-shell">'
-                    '<button class="copy-code" type="button">복사</button>'
+                    f'<button class="copy-code" type="button">{html.escape(copy_label)}</button>'
                     f'<pre><code class="language-{language}">{code_html}</code></pre>'
                     "</div>"
                 )
@@ -400,7 +473,7 @@ def markdown_to_html(
             out.append(
                 f'<h{level} id="{html.escape(anchor)}">'
                 f'{inline_markdown(title, rewrite_href)}'
-                f'<a class="heading-anchor" href="#{html.escape(anchor)}" aria-label="이 절 링크">#</a>'
+                f'<a class="heading-anchor" href="#{html.escape(anchor)}" aria-label="{html.escape(I18N[lang]["section_link"])}">#</a>'
                 f"</h{level}>"
             )
             index += 1
@@ -499,17 +572,49 @@ def make_link_rewriter(
     return rewrite
 
 
-def render_sidebar(toc: dict[str, Any], current: Page, page_by_wrapper: dict[str, Page]) -> str:
+def render_lang_switch(from_page: Page, alt_page: Page | None, lang: str) -> str:
+    labels = I18N[lang]
+    if lang == "ko":
+        ko_href = "./" if from_page.slug == "" else f"../{from_page.slug}/"
+        en_target = alt_page.output_path if alt_page else (PUBLISH_DIR / "en" / from_page.slug / "index.html")
+        en_href = os.path.relpath(en_target, from_page.output_dir).replace(os.sep, "/")
+        active_ko = " active"
+        active_en = ""
+    else:
+        ko_target = alt_page.output_path if alt_page else (PUBLISH_DIR / from_page.slug / "index.html")
+        ko_href = os.path.relpath(ko_target, from_page.output_dir).replace(os.sep, "/")
+        en_href = "./" if from_page.slug == "" else f"../{from_page.slug}/"
+        active_ko = ""
+        active_en = " active"
+
+    return (
+        f'<div class="lang-switch" role="group" aria-label="{html.escape(labels["lang_switch_label"])}">'
+        f'<a href="{html.escape(ko_href)}" class="lang-btn{active_ko}" data-lang="ko" title="한국어로 보기">KO</a>'
+        '<span class="lang-sep">/</span>'
+        f'<a href="{html.escape(en_href)}" class="lang-btn{active_en}" data-lang="en" title="View in English">EN</a>'
+        '</div>'
+    )
+
+
+def render_sidebar(
+    toc: dict[str, Any],
+    current: Page,
+    page_by_wrapper: dict[str, Page],
+    lang: str,
+    alt_page: Page | None,
+) -> str:
+    labels = I18N[lang]
     home = page_by_wrapper["index.md"]
     parts = [
         f'<a class="book-title" href="{relative_link(current, home)}">{html.escape(toc["book"]["title"])}</a>',
         f'<p class="book-subtitle">{html.escape(toc["book"].get("subtitle", ""))}</p>',
+        f'<div class="sidebar-lang-container">{render_lang_switch(current, alt_page, lang)}</div>',
         '<div class="search-box">',
-        '<label for="book-search">웹북 검색</label>',
-        '<input id="book-search" type="search" placeholder="예: always, FSM, VCD" autocomplete="off">',
+        f'<label for="book-search">{html.escape(labels["search_label"])}</label>',
+        f'<input id="book-search" type="search" placeholder="{html.escape(labels["search_placeholder"])}" autocomplete="off">',
         '<div id="search-results" class="search-results" aria-live="polite"></div>',
-        "</div>",
-        '<nav class="toc" aria-label="웹북 목차">',
+        '</div>',
+        f'<nav class="toc" aria-label="{html.escape(labels["menu"])}">',
     ]
     for chapter in toc["chapters"]:
         page = page_by_wrapper[chapter["file"]]
@@ -521,16 +626,16 @@ def render_sidebar(toc: dict[str, Any], current: Page, page_by_wrapper: dict[str
         )
     parts.extend(
         [
-            "</nav>",
+            '</nav>',
             '<div class="sidebar-meta">',
-            f'<a href="{html.escape(toc["book"]["repository_url"])}" target="_blank" rel="noopener">GitHub 저장소</a>',
-            "</div>",
+            f'<a href="{html.escape(toc["book"]["repository_url"])}" target="_blank" rel="noopener">{html.escape(labels["repo_link"])}</a>',
+            '</div>',
         ]
     )
     return "\n".join(parts)
 
 
-def render_section_toc(headings: list[Heading]) -> str:
+def render_section_toc(headings: list[Heading], lang: str) -> str:
     items = [heading for heading in headings if heading.level in {2, 3}]
     if not items:
         return ""
@@ -538,7 +643,8 @@ def render_section_toc(headings: list[Heading]) -> str:
         f'<a class="level-{heading.level}" href="#{html.escape(heading.anchor)}">{html.escape(heading.title)}</a>'
         for heading in items
     ]
-    return '<nav class="section-toc" aria-label="이 페이지 목차"><strong>이 페이지에서</strong>' + "".join(links) + "</nav>"
+    title_text = html.escape(I18N[lang]["section_toc"])
+    return f'<nav class="section-toc" aria-label="{title_text}"><strong>{title_text}</strong>{"".join(links)}</nav>'
 
 
 def render_page(
@@ -547,78 +653,108 @@ def render_page(
     index: int,
     page_by_wrapper: dict[str, Page],
     page_by_content: dict[Path, Page],
+    lang: str,
+    alt_page: Page | None,
 ) -> str:
     page = pages[index]
+    labels = I18N[lang]
     previous = pages[index - 1] if index > 0 else None
     following = pages[index + 1] if index + 1 < len(pages) else None
     rewrite_href = make_link_rewriter(toc, page, page_by_content)
-    content, headings = markdown_to_html(page.body, rewrite_href)
+    content, headings = markdown_to_html(page.body, rewrite_href, lang)
     style_href = os.path.relpath(PUBLISH_DIR / "webbook.css", page.output_dir).replace(os.sep, "/")
     script_href = os.path.relpath(PUBLISH_DIR / "webbook.js", page.output_dir).replace(os.sep, "/")
     favicon_href = os.path.relpath(PUBLISH_DIR / "favicon.svg", page.output_dir).replace(os.sep, "/")
-    search_href = os.path.relpath(PUBLISH_DIR / "search-index.json", page.output_dir).replace(os.sep, "/")
-    site_root = os.path.relpath(PUBLISH_DIR, page.output_dir).replace(os.sep, "/")
+
+    search_file = "en/search-index.json" if lang == "en" else "search-index.json"
+    search_href = os.path.relpath(PUBLISH_DIR / search_file, page.output_dir).replace(os.sep, "/")
+
+    site_root_dir = PUBLISH_DIR / "en" if lang == "en" else PUBLISH_DIR
+    site_root = os.path.relpath(site_root_dir, page.output_dir).replace(os.sep, "/")
     site_root = "./" if site_root == "." else f"{site_root}/"
-    canonical = f"{toc['book']['site_url'].rstrip('/')}/{page.site_path}"
+
+    base_site_url = str(toc["book"]["site_url"]).rstrip("/")
+    if lang == "en" and not base_site_url.endswith("/en"):
+        canonical = f"{base_site_url}/en/{page.slug}/" if page.slug else f"{base_site_url}/en/"
+    else:
+        canonical = f"{base_site_url}/{page.slug}/" if page.slug else f"{base_site_url}/"
+
+    # Alternate link for hreflang
+    if alt_page:
+        if lang == "ko":
+            alt_canonical = f"{base_site_url}/en/{alt_page.slug}/" if alt_page.slug else f"{base_site_url}/en/"
+            alt_lang = "en"
+        else:
+            alt_canonical = f"{base_site_url}/{alt_page.slug}/" if alt_page.slug else f"{base_site_url}/"
+            alt_lang = "ko"
+        alternate_tag = f'<link rel="alternate" hreflang="{alt_lang}" href="{html.escape(alt_canonical, quote=True)}">'
+    else:
+        alternate_tag = ""
 
     page_nav = ['<nav class="page-nav" aria-label="페이지 이동">']
     if previous:
         page_nav.append(
-            f'<a href="{relative_link(page, previous)}"><span>이전 장</span>{html.escape(previous.title)}</a>'
+            f'<a href="{relative_link(page, previous)}"><span>{html.escape(labels["prev"])}</span>{html.escape(previous.title)}</a>'
         )
     else:
         page_nav.append("<div></div>")
     if following:
         page_nav.append(
-            f'<a class="next" href="{relative_link(page, following)}"><span>다음 장</span>{html.escape(following.title)}</a>'
+            f'<a class="next" href="{relative_link(page, following)}"><span>{html.escape(labels["next"])}</span>{html.escape(following.title)}</a>'
         )
     else:
         page_nav.append("<div></div>")
     page_nav.append("</nav>")
 
+    lang_switcher_html = render_lang_switch(page, alt_page, lang)
+
     return f"""<!doctype html>
-<html lang="ko">
+<html lang="{lang}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{html.escape(page.title)} · {html.escape(toc["book"]["title"])}</title>
   <meta name="description" content="{html.escape(page.summary, quote=True)}">
   <link rel="canonical" href="{html.escape(canonical, quote=True)}">
+  {alternate_tag}
   <link rel="icon" href="{html.escape(favicon_href, quote=True)}" type="image/svg+xml">
   <link rel="stylesheet" href="{html.escape(style_href, quote=True)}">
   <script src="{html.escape(script_href, quote=True)}" defer></script>
 </head>
-<body data-search-index="{html.escape(search_href, quote=True)}" data-site-root="{html.escape(site_root, quote=True)}">
+<body data-search-index="{html.escape(search_href, quote=True)}" data-site-root="{html.escape(site_root, quote=True)}" data-lang="{lang}">
   <div class="site-shell">
     <aside class="sidebar" id="sidebar">
-      {render_sidebar(toc, page, page_by_wrapper)}
+      {render_sidebar(toc, page, page_by_wrapper, lang, alt_page)}
     </aside>
     <main class="main">
       <header class="topbar">
-        <button class="menu-button" type="button" aria-controls="sidebar" aria-expanded="false">목차</button>
+        <button class="menu-button" type="button" aria-controls="sidebar" aria-expanded="false">{html.escape(labels["menu"])}</button>
         <div class="crumb">{html.escape(page.chapter)} · {html.escape(page.title)}</div>
-        <a class="top-source" href="{html.escape(source_url(toc, page.content_source), quote=True)}" target="_blank" rel="noopener">원본 보기</a>
+        <div class="topbar-actions">
+          {lang_switcher_html}
+          <a class="top-source" href="{html.escape(source_url(toc, page.content_source), quote=True)}" target="_blank" rel="noopener">{html.escape(labels["source_view"])}</a>
+        </div>
       </header>
       <div class="content-layout">
         <div class="content-wrap">
           <p class="summary">{html.escape(page.summary)}</p>
           <div class="learning-actions">
-            <span>실행 흐름</span>
+            <span>{html.escape(labels["exec_flow"])}</span>
             <code>make test</code>
             <span>→</span>
             <code>PASS</code>
-            <span>→ 결과 해석</span>
+            <span>→ {html.escape(labels["interpret"])}</span>
           </div>
           <article>
             {content}
           </article>
           {''.join(page_nav)}
           <footer class="footer">
-            <span>본문 원본: {html.escape(page.content_source.relative_to(ROOT).as_posix())}</span>
-            <a href="{html.escape(source_url(toc, page.content_source), quote=True)}" target="_blank" rel="noopener">GitHub에서 편집 제안</a>
+            <span>{html.escape(labels["source_prefix"])}{html.escape(page.content_source.relative_to(ROOT).as_posix())}</span>
+            <a href="{html.escape(source_url(toc, page.content_source), quote=True)}" target="_blank" rel="noopener">{html.escape(labels["source_edit"])}</a>
           </footer>
         </div>
-        {render_section_toc(headings)}
+        {render_section_toc(headings, lang)}
       </div>
     </main>
   </div>
@@ -652,8 +788,14 @@ def validate_generated_links() -> None:
         raise SystemExit("생성된 HTML에 끊어진 링크가 있습니다:\n" + "\n".join(missing))
 
 
-def write_support_files(toc: dict[str, Any], pages: list[Page]) -> None:
-    search_index = [
+def write_support_files(
+    ko_toc: dict[str, Any],
+    ko_pages: list[Page],
+    en_toc: dict[str, Any],
+    en_pages: list[Page],
+) -> None:
+    # 1. Korean search index
+    ko_search_index = [
         {
             "id": page.id,
             "title": page.title,
@@ -662,70 +804,123 @@ def write_support_files(toc: dict[str, Any], pages: list[Page]) -> None:
             "chapter": page.chapter,
             "text": plain_search_text(page.body),
         }
-        for page in pages
+        for page in ko_pages
     ]
     (PUBLISH_DIR / "search-index.json").write_text(
-        json.dumps(search_index, ensure_ascii=False, indent=2) + "\n",
+        json.dumps(ko_search_index, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
-    version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
+
+    # 2. English search index
+    en_search_index = [
+        {
+            "id": page.id,
+            "title": page.title,
+            "summary": page.summary,
+            "url": page.site_path.replace("en/", "", 1),  # relative to en site root
+            "chapter": page.chapter,
+            "text": plain_search_text(page.body),
+        }
+        for page in en_pages
+    ]
+    (PUBLISH_DIR / "en" / "search-index.json").write_text(
+        json.dumps(en_search_index, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+    # 3. Build info
+    version = (ROOT / "VERSION").read_text(encoding="utf-8").strip() if (ROOT / "VERSION").exists() else "1.0.0"
     build_info = {
-        "title": toc["book"]["title"],
+        "title": ko_toc["book"]["title"],
+        "title_en": en_toc["book"]["title"],
         "version": version,
-        "pages": len(pages),
-        "source": "tutorial/**/README.md",
+        "languages": ["ko", "en"],
+        "pages_total": len(ko_pages) + len(en_pages),
+        "pages_ko": len(ko_pages),
+        "pages_en": len(en_pages),
+        "source_ko": "tutorial/**/README.md",
+        "source_en": "tutorial_en/**/README.md",
     }
     (PUBLISH_DIR / "build-info.json").write_text(
         json.dumps(build_info, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
-    site_url = str(toc["book"]["site_url"]).rstrip("/")
-    sitemap_urls = "\n".join(f"  <url><loc>{site_url}/{page.site_path}</loc></url>" for page in pages)
+
+    # 4. Sitemap with both languages
+    site_url = str(ko_toc["book"]["site_url"]).rstrip("/")
+    all_pages = ko_pages + en_pages
+    sitemap_urls = "\n".join(f"  <url><loc>{site_url}/{page.site_path}</loc></url>" for page in all_pages)
     (PUBLISH_DIR / "sitemap.xml").write_text(
         f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{sitemap_urls}\n</urlset>\n',
         encoding="utf-8",
     )
+
+    # 5. Robots and .nojekyll
     (PUBLISH_DIR / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {site_url}/sitemap.xml\n", encoding="utf-8")
     (PUBLISH_DIR / ".nojekyll").write_text("", encoding="utf-8")
 
 
 def build() -> None:
-    toc = read_toc()
-    pages = load_pages(toc)
-    page_by_wrapper = {page.wrapper_source.relative_to(BOOK_DIR).as_posix(): page for page in pages}
-    page_by_content = {page.content_source.resolve(): page for page in pages}
+    ko_toc = read_toc(TOC_PATH)
+    en_toc = read_toc(EN_TOC_PATH)
+
+    ko_pages = load_pages(BOOK_DIR, ko_toc, TUTORIAL_DIR, lang="ko")
+    en_pages = load_pages(EN_BOOK_DIR, en_toc, TUTORIAL_EN_DIR, lang="en")
+
+    ko_page_by_wrapper = {page.wrapper_source.relative_to(BOOK_DIR).as_posix(): page for page in ko_pages}
+    ko_page_by_content = {page.content_source.resolve(): page for page in ko_pages}
+
+    en_page_by_wrapper = {page.wrapper_source.relative_to(EN_BOOK_DIR).as_posix(): page for page in en_pages}
+    en_page_by_content = {page.content_source.resolve(): page for page in en_pages}
+
+    ko_by_id = {page.id: page for page in ko_pages}
+    en_by_id = {page.id: page for page in en_pages}
 
     if PUBLISH_DIR.exists():
         shutil.rmtree(PUBLISH_DIR)
     PUBLISH_DIR.mkdir(parents=True, exist_ok=True)
+    (PUBLISH_DIR / "en").mkdir(parents=True, exist_ok=True)
+
     shutil.copy2(STYLE_PATH, PUBLISH_DIR / "webbook.css")
     shutil.copy2(SCRIPT_PATH, PUBLISH_DIR / "webbook.js")
     shutil.copy2(FAVICON_PATH, PUBLISH_DIR / "favicon.svg")
 
-    for index, page in enumerate(pages):
+    # Render Korean pages
+    for index, page in enumerate(ko_pages):
         page.output_dir.mkdir(parents=True, exist_ok=True)
-        rendered = render_page(toc, pages, index, page_by_wrapper, page_by_content)
+        alt_page = en_by_id.get(page.id)
+        rendered = render_page(ko_toc, ko_pages, index, ko_page_by_wrapper, ko_page_by_content, "ko", alt_page)
         page.output_path.write_text(rendered, encoding="utf-8")
 
-    write_support_files(toc, pages)
+    # Render English pages
+    for index, page in enumerate(en_pages):
+        page.output_dir.mkdir(parents=True, exist_ok=True)
+        alt_page = ko_by_id.get(page.id)
+        rendered = render_page(en_toc, en_pages, index, en_page_by_wrapper, en_page_by_content, "en", alt_page)
+        page.output_path.write_text(rendered, encoding="utf-8")
+
+    write_support_files(ko_toc, ko_pages, en_toc, en_pages)
     validate_generated_links()
-    print(f"PASS webbook: {len(pages)} pages -> {PUBLISH_DIR}")
+    print(f"PASS webbook: {len(ko_pages)} KO + {len(en_pages)} EN = {len(ko_pages) + len(en_pages)} pages -> {PUBLISH_DIR}")
 
 
 def configure_paths(args: argparse.Namespace) -> None:
-    global ROOT, BOOK_DIR, TOC_PATH, STYLE_PATH, SCRIPT_PATH, FAVICON_PATH, PUBLISH_DIR, TUTORIAL_DIR
+    global ROOT, BOOK_DIR, EN_BOOK_DIR, TOC_PATH, EN_TOC_PATH, STYLE_PATH, SCRIPT_PATH, FAVICON_PATH, PUBLISH_DIR, TUTORIAL_DIR, TUTORIAL_EN_DIR
     ROOT = Path(args.root).resolve()
     BOOK_DIR = (ROOT / args.book_dir).resolve()
+    EN_BOOK_DIR = BOOK_DIR / "en"
     TOC_PATH = (ROOT / args.toc).resolve()
+    EN_TOC_PATH = (EN_BOOK_DIR / "toc.yml").resolve()
     STYLE_PATH = (ROOT / args.style).resolve()
     SCRIPT_PATH = (ROOT / args.script).resolve()
     FAVICON_PATH = (ROOT / args.favicon).resolve()
     PUBLISH_DIR = (ROOT / args.output).resolve()
     TUTORIAL_DIR = (ROOT / "tutorial").resolve()
+    TUTORIAL_EN_DIR = (ROOT / "tutorial_en").resolve()
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Verilog 자습서를 정적 웹북으로 생성합니다.")
+    parser = argparse.ArgumentParser(description="Verilog 자습서를 다국어(한국어/영어) 정적 웹북으로 생성합니다.")
     parser.add_argument("--root", default=".", help="저장소 루트")
     parser.add_argument("--book-dir", default="drafts/book", help="웹북 메타데이터 디렉터리")
     parser.add_argument("--toc", default="drafts/book/toc.yml", help="JSON 호환 목차 파일")

@@ -1,0 +1,96 @@
+{
+  "book": {
+    "title": "Verilog for Computer Architecture",
+    "subtitle": "A 10-Chapter Executable Tutorial for Running Code and Interpreting Results",
+    "slug": "computer-architecture-verilog-tutorial",
+    "description": "Learn combinational and sequential logic, memory, FSM, and verification with Icarus Verilog.",
+    "repository_url": "https://github.com/yunju-baek/computer-architecture-verilog-tutorial",
+    "site_url": "https://yunju-baek.github.io/computer-architecture-verilog-tutorial/en/"
+  },
+  "chapters": [
+    {
+      "id": "home",
+      "title": "Getting Started",
+      "file": "index.md",
+      "slug": "",
+      "pages": []
+    },
+    {
+      "id": "ch01",
+      "title": "01. Toolchain & First Module",
+      "file": "chapters/ch01.md",
+      "slug": "ch01",
+      "pages": []
+    },
+    {
+      "id": "ch02",
+      "title": "02. Syntax & Data Types",
+      "file": "chapters/ch02.md",
+      "slug": "ch02",
+      "pages": []
+    },
+    {
+      "id": "ch03",
+      "title": "03. Operators & Bit-Width Rules",
+      "file": "chapters/ch03.md",
+      "slug": "ch03",
+      "pages": []
+    },
+    {
+      "id": "ch04",
+      "title": "04. Combinational Logic",
+      "file": "chapters/ch04.md",
+      "slug": "ch04",
+      "pages": []
+    },
+    {
+      "id": "ch05",
+      "title": "05. Sequential Logic",
+      "file": "chapters/ch05.md",
+      "slug": "ch05",
+      "pages": []
+    },
+    {
+      "id": "ch06",
+      "title": "06. Hierarchy & Parameterization",
+      "file": "chapters/ch06.md",
+      "slug": "ch06",
+      "pages": []
+    },
+    {
+      "id": "ch07",
+      "title": "07. Memory & FSM",
+      "file": "chapters/ch07.md",
+      "slug": "ch07",
+      "pages": []
+    },
+    {
+      "id": "ch08",
+      "title": "08. Testbench Methodologies",
+      "file": "chapters/ch08.md",
+      "slug": "ch08",
+      "pages": []
+    },
+    {
+      "id": "ch09",
+      "title": "09. Synthesizable RTL Guidelines",
+      "file": "chapters/ch09.md",
+      "slug": "ch09",
+      "pages": []
+    },
+    {
+      "id": "ch10",
+      "title": "10. SystemVerilog Contrast",
+      "file": "chapters/ch10.md",
+      "slug": "ch10",
+      "pages": []
+    },
+    {
+      "id": "appendix",
+      "title": "Appendix. Quick Reference",
+      "file": "appendix/quick-reference.md",
+      "slug": "appendix",
+      "pages": []
+    }
+  ]
+}

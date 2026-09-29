@@ -247,6 +247,54 @@ input:focus-visible {
   font-weight: 700;
 }
 
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: 0.78rem;
+  font-weight: 700;
+  gap: 6px;
+  line-height: 1;
+}
+
+.lang-btn {
+  color: var(--muted);
+  text-decoration: none;
+  padding: 3px 6px;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.lang-btn:hover {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.lang-btn.active {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-weight: 800;
+}
+
+.lang-sep {
+  color: var(--line);
+  font-size: 0.75rem;
+  user-select: none;
+}
+
+.sidebar-lang-container {
+  margin: -12px 0 20px;
+}
+
 .content-layout {
   display: grid;
   grid-template-columns: minmax(0, var(--content)) 218px;

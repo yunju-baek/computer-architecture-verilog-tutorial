@@ -1,11 +1,12 @@
-.PHONY: help setup-check tutorial test errors waves webbook webbook-check check-packet-verify clean package-check
+.PHONY: help setup-check tutorial test tutorial-en test-en errors waves webbook webbook-check check-packet-verify clean package-check
 
 help:
 	@echo 'make setup-check   # Icarus Verilog 도구 확인'
-	@echo 'make test          # Verilog 자습서 전체 실행'
+	@echo 'make test          # Verilog 자습서 전체 실행 (한국어)'
+	@echo 'make test-en       # Verilog 자습서 전체 실행 (영어)'
 	@echo 'make errors        # 의도적 결함 예제 실행'
 	@echo 'make waves         # ch10 통합 VCD 생성'
-	@echo 'make webbook       # 정적 웹북 생성'
+	@echo 'make webbook       # 정적 웹북 생성 (한국어 및 영어)'
 	@echo 'make webbook-check # 웹북 구조와 링크 검증'
 	@echo 'make clean         # 생성물 정리'
 	@echo 'make package-check # 공개 패키지 검증'
@@ -16,6 +17,9 @@ setup-check:
 
 tutorial test:
 	$(MAKE) --no-print-directory -C tutorial test
+
+tutorial-en test-en:
+	$(MAKE) --no-print-directory -C tutorial_en test
 
 errors:
 	$(MAKE) --no-print-directory -C tutorial errors
@@ -31,7 +35,9 @@ webbook-check:
 	python3 tools/build_webbook.py --check
 	@test -f publish/webbook/index.html
 	@test -f publish/webbook/search-index.json
-	@test "$$(find publish/webbook -name index.html | wc -l | tr -d ' ')" = 12
+	@test -f publish/webbook/en/index.html
+	@test -f publish/webbook/en/search-index.json
+	@test "$$(find publish/webbook -name index.html | wc -l | tr -d ' ')" = 24
 	@echo 'PASS webbook package'
 
 check-packet-verify:
@@ -46,6 +52,7 @@ check-packet-verify:
 
 clean:
 	$(MAKE) --no-print-directory -C tutorial clean
+	$(MAKE) --no-print-directory -C tutorial_en clean
 	$(RM) -r publish/webbook tools/__pycache__
 
 package-check:
@@ -54,8 +61,10 @@ package-check:
 	@test -f release_manifest.json
 	@test -f assignments/README.md
 	@test -d tutorial
+	@test -d tutorial_en
 	@test -z "$$(find assignments -mindepth 1 -maxdepth 1 -type d -print -quit)"
 	@$(MAKE) --no-print-directory test
+	@$(MAKE) --no-print-directory test-en
 	@$(MAKE) --no-print-directory webbook-check
 	@$(MAKE) --no-print-directory check-packet-verify
 	@echo 'PASS public tutorial and webbook package'

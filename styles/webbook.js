@@ -1,5 +1,6 @@
 (() => {
   const body = document.body;
+  const isEn = document.documentElement.lang === "en" || body.dataset.lang === "en";
   const menuButton = document.querySelector(".menu-button");
   const sidebar = document.querySelector(".sidebar");
 
@@ -16,13 +17,27 @@
     });
   }
 
+  // Language button preference persistence
+  document.querySelectorAll(".lang-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const targetLang = btn.dataset.lang;
+      if (targetLang) {
+        try {
+          localStorage.setItem("webbook_lang", targetLang);
+        } catch (_) {}
+      }
+    });
+  });
+
+  const copiedLabel = isEn ? "Copied" : "복사됨";
+  const copyLabel = isEn ? "Copy" : "복사";
   document.querySelectorAll(".copy-code").forEach((button) => {
     button.addEventListener("click", async () => {
       const code = button.parentElement?.querySelector("code")?.textContent ?? "";
       await navigator.clipboard.writeText(code);
-      button.textContent = "복사됨";
+      button.textContent = copiedLabel;
       window.setTimeout(() => {
-        button.textContent = "복사";
+        button.textContent = copyLabel;
       }, 1400);
     });
   });
@@ -33,7 +48,7 @@
   const siteRoot = body.dataset.siteRoot ?? "./";
   let pages = [];
 
-  const normalize = (value) => value.toLocaleLowerCase("ko-KR").replace(/\s+/g, " ").trim();
+  const normalize = (value) => value.toLocaleLowerCase(isEn ? "en-US" : "ko-KR").replace(/\s+/g, " ").trim();
 
   const scorePage = (page, terms) => {
     const title = normalize(page.title);
@@ -67,7 +82,7 @@
     if (matches.length === 0) {
       const empty = document.createElement("p");
       empty.className = "search-empty";
-      empty.textContent = "검색 결과가 없습니다.";
+      empty.textContent = isEn ? "No results found." : "검색 결과가 없습니다.";
       searchResults.append(empty);
     } else {
       for (const { page } of matches) {
@@ -95,7 +110,7 @@
         searchInput.addEventListener("input", (event) => renderResults(event.target.value));
       })
       .catch(() => {
-        searchInput.placeholder = "검색 색인 준비 중";
+        searchInput.placeholder = isEn ? "Loading search index" : "검색 색인 준비 중";
       });
   }
 })();

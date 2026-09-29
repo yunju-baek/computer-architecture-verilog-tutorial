@@ -1,8 +1,10 @@
 # Computer Architecture Verilog Tutorial
 
+[ 🇰🇷 한국어 ](README.md) | [ 🇺🇸 English ](README.en.md) | [ 🌐 웹북 (KO) ](https://yunju-baek.github.io/computer-architecture-verilog-tutorial/) | [ 🌐 Webbook (EN) ](https://yunju-baek.github.io/computer-architecture-verilog-tutorial/en/)
+
 부산대학교 컴퓨터구조 수업에서 사용하는 실행형 Verilog 자습서다. 학생은 Icarus Verilog로 RTL과 testbench를 컴파일하고, 시뮬레이션 결과와 VCD 파형을 확인하며 컴퓨터구조의 상태 전이와 데이터 이동을 학습한다.
 
-웹에서 읽는 장별 자습서는 **[컴퓨터구조를 위한 Verilog 웹북](https://yunju-baek.github.io/computer-architecture-verilog-tutorial/)**에서 제공한다.
+웹에서 읽는 장별 자습서는 **[컴퓨터구조를 위한 Verilog 웹북](https://yunju-baek.github.io/computer-architecture-verilog-tutorial/)**(영문판: [Webbook in English](https://yunju-baek.github.io/computer-architecture-verilog-tutorial/en/))에서 제공한다. 웹북 상단 우측의 언어 선택기(`[KO | EN]`)를 누르면 해당 페이지의 한국어판과 영어판을 즉시 전환할 수 있다.
 
 ## 학습 목표
 
@@ -19,32 +21,34 @@
 git clone https://github.com/yunju-baek/computer-architecture-verilog-tutorial.git
 cd computer-architecture-verilog-tutorial
 make setup-check
-make test
+make test       # 한국어 자습서 트리 검증
+make test-en    # 영어 자습서 트리 검증
 ```
 
-전체 예제가 통과하면 마지막 행에 `PASS tutorial 전체`가 출력된다.
+전체 예제가 통과하면 마지막 행에 `PASS tutorial 전체` 또는 `PASS tutorial all`이 출력된다.
 
 ## 주요 명령
 
 | 명령 | 기능 |
 |---|---|
 | `make setup-check` | `iverilog`와 `vvp` 설치 상태 확인 |
-| `make test` | 10개 챕터의 정상 예제 실행 |
+| `make test` | 10개 챕터의 정상 예제 실행 (한국어 트리) |
+| `make test-en` | 10개 챕터의 정상 예제 실행 (영어 트리) |
 | `make errors` | 의도적 결함과 컴파일 진단을 학습 출력으로 확인 |
 | `make waves` | `tutorial/ch10/build/overview.vcd` 생성과 GTKWave 연동 |
-| `make webbook` | 12페이지 정적 웹북 생성과 링크 검증 |
-| `make webbook-check` | Python 문법, 새 웹북 빌드와 페이지 수 검증 |
+| `make webbook` | 24페이지 다국어(한국어/영어) 정적 웹북 생성과 링크 검증 |
+| `make webbook-check` | Python 문법, 새 웹북 빌드와 페이지 수(24개) 검증 |
 | `make clean` | Verilog와 웹북 생성물 정리 |
 | `make package-check` | 공개 패키지, 전체 예제와 웹북 검증 |
 | `make check-packet-verify` | 점검 과제 probe 10개의 컴파일 확인 |
 
-세부 목차와 권장 학습 순서는 [tutorial/README.md](tutorial/README.md)에서 확인한다.
+세부 목차와 권장 학습 순서는 한국어 [tutorial/README.md](tutorial/README.md) 및 영어 [tutorial_en/README.md](tutorial_en/README.md)에서 확인한다.
 
 ## 웹북 생성과 배포
 
-웹북 12페이지는 시작 페이지, ch01~ch10과 빠른 참조 부록으로 구성된다. 본문을 수정할 때는 `tutorial/**/README.md`를 편집한다. `drafts/book/`은 안정적인 페이지 ID, 제목, 별칭과 학습 요약을 관리한다. `publish/webbook/`은 빌드할 때마다 생성되는 HTML 결과다.
+웹북은 한국어 12페이지(시작 페이지, ch01~ch10, 빠른 참조 부록)와 영어 12페이지를 합쳐 총 24페이지로 구성된다. 본문을 수정할 때는 `tutorial/**/README.md`(한국어) 및 `tutorial_en/**/README.md`(영어)를 편집한다. `drafts/book/`은 안정적인 페이지 ID, 제목, 별칭과 학습 요약을 관리한다. `publish/webbook/`은 빌드할 때마다 생성되는 HTML 결과다.
 
-릴리스 검증 명령인 `make webbook-check`는 웹북 생성 과정을 포함하며 HTML, 검색 색인과 사이트맵을 `publish/webbook/`에 만든다.
+릴리스 검증 명령인 `make webbook-check`는 웹북 생성 과정을 포함하며 HTML, 언어별 검색 색인과 사이트맵을 `publish/webbook/`에 만든다.
 
 ```bash
 make webbook-check
