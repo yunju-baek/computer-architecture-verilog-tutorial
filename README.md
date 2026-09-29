@@ -66,10 +66,18 @@ make webbook-check
 
 ## 점검 과제
 
-자습서 CH01–CH05, CH06–CH10의 설명 수업 뒤에 제출하는 점검 과제 2개가 [`check_packet/`](check_packet/README.md)에 있다. 각 점검은 `make setup-check`로 도구 설치를 확인하고, 해당 구간 5개 장의 `make test`를 실행한 뒤, 학번에서 파생된 입력에 대한 예상값을 `predictions.vh`에 적어 실행 결과와 대조한다. `make package`가 제출용 zip을 만든다.
+자습서 CH01–CH05, CH06–CH10의 설명 수업 뒤에 제출하는 점검 과제 2개가 한국어 패키지 [`check_packet/`](check_packet/README.md)와 영어 패키지 [`check_packet_en/`](check_packet_en/README.md)로 제공된다. 각 점검은 `make setup-check`로 도구 설치를 확인하고, 해당 구간 5개 장의 `make test`를 실행한 뒤, 학번에서 파생된 입력에 대한 예상값을 `predictions.vh`에 적어 실행 결과와 대조한다. `make package`가 제출용 zip을 만든다.
 
 ```bash
+# 한국어 점검 과제
 cd check_packet/check1
+make setup-check
+make show-inputs
+make test
+make package
+
+# English Edition
+cd check_packet_en/check1
 make setup-check
 make show-inputs
 make test

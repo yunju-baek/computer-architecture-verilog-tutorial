@@ -1,0 +1,3 @@
+# Student submission packages and local build artifacts
+verilog_check*.zip
+tb_boundary.v

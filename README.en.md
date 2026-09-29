@@ -64,6 +64,26 @@ The GitHub Pages workflow on the `main` branch automatically deploys the built w
 
 Assignment materials are added sequentially to [`assignments/`](assignments/README.md) in accordance with the course syllabus and LMS announcements. Released assignments are version-pinned via repository commits and Git tags.
 
+## Check Assignments
+
+Two automated check assignments accompanying the lecture walkthroughs for CH01–CH05 and CH06–CH10 are available in the English package [`check_packet_en/`](check_packet_en/README.md) and the Korean package [`check_packet/`](check_packet/README.md). Each check runs `make setup-check` to verify local EDA tooling, executes the corresponding 5-chapter tutorial regression suite, compares student-derived predictions in `predictions.vh` against live RTL simulation, and generates the final submission archive via `make package`.
+
+```bash
+# English Check Assignments
+cd check_packet_en/check1
+make setup-check
+make show-inputs
+make test
+make package
+
+# Korean Edition
+cd check_packet/check1
+make setup-check
+make show-inputs
+make test
+make package
+```
+
 ## Integrity and Academic Honor
 
 Students are encouraged to consult official documentation, reference manuals, and instructional AI assistants as permitted by the course syllabus. Course announcements on LMS define authoritative submission boundaries. Each student is personally responsible for validating, understanding, and defending their submitted code, testbenches, and written analyses.

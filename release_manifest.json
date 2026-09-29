@@ -6,7 +6,8 @@
     "tutorial",
     "tutorial_en",
     "webbook",
-    "check_packet"
+    "check_packet",
+    "check_packet_en"
   ],
   "assignments": [],
   "assignment_release_policy": "Add each assignment to the public Git history at its announced release time.",
@@ -26,6 +27,15 @@
   },
   "check_packet": {
     "path": "check_packet/",
+    "checks": [
+      "check1: ch01-ch05, 20 predictions",
+      "check2: ch06-ch10, 17 predictions + tb_boundary 12 vectors"
+    ],
+    "student_inputs": "derived from STUDENT_ID in student.mk (common/lcg.vh)",
+    "submission": "make package -> verilog_checkN_<id>.zip"
+  },
+  "check_packet_en": {
+    "path": "check_packet_en/",
     "checks": [
       "check1: ch01-ch05, 20 predictions",
       "check2: ch06-ch10, 17 predictions + tb_boundary 12 vectors"

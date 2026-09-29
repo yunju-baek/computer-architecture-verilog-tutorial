@@ -1,4 +1,4 @@
-.PHONY: help setup-check tutorial test tutorial-en test-en errors waves webbook webbook-check check-packet-verify clean package-check
+.PHONY: help setup-check tutorial test tutorial-en test-en errors waves webbook webbook-check check-packet-verify check-packet-en-verify clean package-check
 
 help:
 	@echo 'make setup-check   # Icarus Verilog 도구 확인'
@@ -11,6 +11,7 @@ help:
 	@echo 'make clean         # 생성물 정리'
 	@echo 'make package-check # 공개 패키지 검증'
 	@echo 'make check-packet-verify # 점검 과제 probe 컴파일 확인'
+	@echo 'make check-packet-en-verify # 점검 과제 영어판 probe 컴파일 확인'
 
 setup-check:
 	$(MAKE) --no-print-directory -C tutorial setup-check
@@ -50,6 +51,16 @@ check-packet-verify:
 	done
 	@echo 'PASS check_packet probes compile'
 
+check-packet-en-verify:
+	@for c in 1 2; do \
+	  for p in check_packet_en/check$$c/probes/*.v; do \
+	    n=$$(basename $$p .v); ch=$${n#probe_}; \
+	    duts=$$(sed -n "s/^DUT_$$ch *:= *//p" check_packet_en/check$$c/Makefile | sed 's#$$(TUTORIAL)#tutorial_en#g'); \
+	    iverilog -g2012 -Wall -I check_packet_en/common -I check_packet_en/check$$c -s $$n -o /dev/null $$duts $$p || exit 1; \
+	  done; \
+	done
+	@echo 'PASS check_packet_en probes compile'
+
 clean:
 	$(MAKE) --no-print-directory -C tutorial clean
 	$(MAKE) --no-print-directory -C tutorial_en clean
@@ -62,9 +73,12 @@ package-check:
 	@test -f assignments/README.md
 	@test -d tutorial
 	@test -d tutorial_en
+	@test -d check_packet
+	@test -d check_packet_en
 	@test -z "$$(find assignments -mindepth 1 -maxdepth 1 -type d -print -quit)"
 	@$(MAKE) --no-print-directory test
 	@$(MAKE) --no-print-directory test-en
 	@$(MAKE) --no-print-directory webbook-check
 	@$(MAKE) --no-print-directory check-packet-verify
+	@$(MAKE) --no-print-directory check-packet-en-verify
 	@echo 'PASS public tutorial and webbook package'

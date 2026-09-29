@@ -1,0 +1,10 @@
+# Student Verification and Integrity Pledge — Verilog Check 2
+
+This record documents the verification procedures and ownership criteria performed by the student.
+
+- Reference materials and tools consulted (Optional): [Fill in]
+- Scope of work performed using referenced materials or tools (Optional): [Fill in]
+- Number of expected values calculated manually by the student (out of 17): [Fill in]
+- Code lines in tb_boundary.v modified directly by the student: [Fill in]
+- Verification commands directly executed by the student: [Fill in]
+- Final Ownership Statement: I can explain and defend all contents of predictions.vh, tb_boundary.v, report.md, and evidence/, and I have verified the simulation results directly.
