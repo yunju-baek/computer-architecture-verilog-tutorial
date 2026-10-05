@@ -56,5 +56,6 @@
   "assignment_previews": {
     "hw03": "Single-cycle core integration; topic only",
     "hw04": "Pipeline dependencies and performance; topic only"
-  }
+  },
+  "lms_announcements": "instructor-held; excluded from public files and downloads"
 }

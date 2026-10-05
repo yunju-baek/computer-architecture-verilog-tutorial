@@ -60,7 +60,7 @@ make webbook-check
 
 ## 학생 과제
 
-현재 공개 범위는 **HW01·HW02**이다. 한국어 자료는 [assignments/](assignments/README.md), 영어 자료는 [assignments_en/](assignments_en/README.md)에 있다. 각 폴더에는 starter code, 공개 검사, 보고서 양식과 LMS 안내문을 제공한다.
+현재 공개 범위는 **HW01·HW02**이다. 한국어 자료는 [assignments/](assignments/README.md), 영어 자료는 [assignments_en/](assignments_en/README.md)에 있다. 각 폴더에는 starter code, 공개 검사와 보고서 양식을 제공한다.
 
 - [한국어 HW01–HW02 ZIP](downloads/archlab-hw01-hw02-ko.zip)
 - [English HW01–HW02 ZIP](downloads/archlab-hw01-hw02-en.zip)

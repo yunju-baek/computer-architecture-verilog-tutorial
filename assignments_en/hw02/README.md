@@ -45,5 +45,3 @@ Reuse `alu.v`, `regfile.v`, `rv32i_immgen.v`, and `rv32i_decode.v` in HW03. The 
 Consult ch02–ch05 and ch07–ch08 of the [Verilog tutorial](../../tutorial_en/README.md). The [arithmetic reference](../../tutorial_en/arithmetic_reference/README.md) supplies complete Python code. Python implementation, dot-product analysis, and accumulator study are optional. Submitting this work is also optional.
 
 See the [interface contract](CONTRACT.md) for control codes and the supported subset.
-
-[LMS announcement](lms_announcement.md)

@@ -2,10 +2,10 @@
 
 HW01 and HW02 are available below. Read each assignment for the implementation, tests, and submission files. Each report has four sections. Each assignment is worth 100 points: implementation 50, verification 30, report 20. Follow the deadline and upload format in the corresponding LMS entry.
 
-| Assignment | Topic | Instructions | LMS post |
-|---|---|---|---|
-| HW01 | Function calls and architectural state | [README](hw01/README.md) | [LMS announcement](hw01/lms_announcement.md) |
-| HW02 | Processor building blocks | [README](hw02/README.md) | [LMS announcement](hw02/lms_announcement.md) |
+| Assignment | Topic | Instructions |
+|---|---|---|
+| HW01 | Function calls and architectural state | [README](hw01/README.md) |
+| HW02 | Processor building blocks | [README](hw02/README.md) |
 
 ## Run
 

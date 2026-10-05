@@ -22,7 +22,6 @@ This unified package integrates the self-study guides, lecture slides, supplemen
 ```text
 check_packet_en/
   README.md                   ← Unified guide and execution manual
-  lms_announcement.md         ← LMS assignment posting template
   tool_setup_first_run.md     ← Tool installation guide (WSL/macOS)
   supplementary_concepts.md   ← Signed numbers, shifts, and latch mitigation
   Makefile                    ← Batch execution and packaging entry point
@@ -83,5 +82,5 @@ make clean            # Remove build artifacts and temporary logs
 ## 5. Submission Guidelines
 
 - Required files: `verilog_check1_<id>.zip`, `verilog_check2_<id>.zip`
-- Platform and deadlines: consult [LMS Announcement](lms_announcement.md) and instructor notices.
+- Platform and deadlines: follow the LMS assignment entry and instructor notices.
 - If execution errors persist, package the current state through `make package` and detail the reproduction command, initial error message, and debugging attempts in `report.md`.

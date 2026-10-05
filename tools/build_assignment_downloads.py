@@ -15,7 +15,7 @@ def package_files(language):
         for path in sorted(base.rglob("*")):
             if not path.is_file() or any(x in path.parts for x in ("build", "evidence", "__pycache__")):
                 continue
-            if path.name == ".DS_Store" or path.suffix in (".pyc", ".vcd", ".vvp", ".zip"):
+            if "lms" in path.name.lower() or path.name == ".DS_Store" or path.suffix in (".pyc", ".vcd", ".vvp", ".zip"):
                 continue
             files[path.relative_to(ROOT).as_posix()] = path.read_bytes()
     index = (ROOT / assignments / "README.md").read_text()

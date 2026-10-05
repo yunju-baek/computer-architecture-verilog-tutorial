@@ -83,5 +83,3 @@ Submit the assignment folder containing:
 - The `evidence/` output from `make evidence` and `make ra-experiment`
 
 Retain the provided C reference, tools, and public tests. Assessment covers assembly behavior and state preservation, four trace explanations, two boundary tests, and prediction, observation, and explanation of the return-address experiment. Machine-code field analysis and additional C programming are optional study activities.
-
-[LMS announcement](lms_announcement.md)

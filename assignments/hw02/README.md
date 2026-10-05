@@ -45,5 +45,3 @@ ALU 공개 검사는 10개 연산, 시프트 양의 하위 5비트, signed 경�
 [Verilog 자습서](../../tutorial/README.md)의 ch02–ch05, ch07–ch08을 참고한다. [산술 참조](../../tutorial/arithmetic_reference/README.md)는 완성된 Python 코드와 선택 실습이다. Python 구현·내적 분석은 선택 학습으로 수행하며, 해당 결과의 별도 제출도 선택 사항이다.
 
 세부 포트·제어 코드·지원 명령어는 [인터페이스 명세](CONTRACT.md)를 따른다.
-
-[LMS 안내문](lms_announcement.md)

@@ -83,5 +83,3 @@ make ra-experiment
 - `make evidence`와 `make ra-experiment`의 `evidence/` 산출물
 
 제공된 C 참조 구현·도구·공개 검사는 함께 유지한다. 평가는 어셈블리 동작과 상태 보존, 네 사례의 trace 해석, 두 경계값 테스트, `ra` 실험의 예측·관측·원인 설명을 기준으로 한다. 기계어 필드 분석과 추가 C 구현은 선택 학습으로 활용한다.
-
-[LMS 안내문](lms_announcement.md)

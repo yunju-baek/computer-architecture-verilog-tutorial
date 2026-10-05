@@ -14,6 +14,7 @@ def check_names(names):
     for name in names:
         parts = Path(name).parts
         assert not FORBIDDEN.intersection(parts), name
+        assert not any("lms" in part.lower() for part in parts), name
         assert not any(re.fullmatch(r"hw0[3-9]", x) for x in parts), name
         assert ".." not in parts and not Path(name).is_absolute(), name
 
@@ -27,6 +28,9 @@ def check_links(root):
 
 
 def main():
+    for path in ROOT.rglob("*"):
+        if path.is_file() and ".git" not in path.parts:
+            assert "lms" not in path.name.lower(), path
     manifest = json.loads((ROOT / "release_manifest.json").read_text())
     assert set(manifest["assignments"]) == ALLOWED
     for directory in ("assignments", "assignments_en"):
@@ -36,7 +40,7 @@ def main():
         check_links(base)
         for hw in sorted(ALLOWED):
             work = base / hw
-            for name in ("README.md", "report.md", "integrity.txt", "Makefile", "lms_announcement.md"):
+            for name in ("README.md", "report.md", "integrity.txt", "Makefile"):
                 assert (work / name).is_file(), (directory, hw, name)
             assert len(re.findall(r"^## ", (work / "report.md").read_text(), re.M)) == 4
             if hw == "hw02":

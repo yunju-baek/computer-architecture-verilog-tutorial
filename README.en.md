@@ -62,7 +62,7 @@ The GitHub Pages workflow on the `main` branch automatically deploys the built w
 
 ## Student assignments
 
-**HW01 and HW02 are available.** Use [assignments_en/](assignments_en/README.md) for English or [assignments/](assignments/README.md) for Korean. Each assignment includes starter code, public tests, a report template, and an LMS announcement.
+**HW01 and HW02 are available.** Use [assignments_en/](assignments_en/README.md) for English or [assignments/](assignments/README.md) for Korean. Each assignment includes starter code, public tests, and a report template.
 
 - [English HW01–HW02 ZIP](downloads/archlab-hw01-hw02-en.zip)
 - [한국어 HW01–HW02 ZIP](downloads/archlab-hw01-hw02-ko.zip)

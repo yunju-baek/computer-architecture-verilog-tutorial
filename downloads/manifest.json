@@ -5,14 +5,14 @@
   ],
   "packages": {
     "archlab-hw01-hw02-ko.zip": {
-      "files": 159,
-      "bytes": 169529,
-      "sha256": "aad5135b832ce651b6d3498249ce665d94784e2a958b5b1392f05dcbdbf676bc"
+      "files": 157,
+      "bytes": 166603,
+      "sha256": "675c888795fe8cb29d04397dd6687e85118dec791bccf57526ce5dc7e0d07249"
     },
     "archlab-hw01-hw02-en.zip": {
-      "files": 159,
-      "bytes": 164177,
-      "sha256": "ae3d7ee2ea4ba70c79071a4624b3a98667462fc970538e07913da30c3eeeb293"
+      "files": 157,
+      "bytes": 161586,
+      "sha256": "82d9a64a31eb173ca074acfe2e6ab5ff1f2d1ff34d45e3d5f8b38363fc27dc14"
     }
   }
 }
