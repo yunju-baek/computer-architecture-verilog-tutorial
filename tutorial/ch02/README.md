@@ -2,7 +2,7 @@
 
 ## 1. 학습 도달 목표
 
-본 챕터를 완료하면 Verilog 하드웨어 기술에 필요한 자료형 체계와 비트 조작 문법을 완벽히 습득한다. 본 챕터의 내용은 HW02–HW05 전 과제에 걸쳐 매 행 적용된다. 특히 3절과 6절의 비트 슬라이싱 및 부호 확장(Sign Extension) 기법은 HW03 즉치수 생성기(ImmGen)의 핵심 구현 지식이다.
+본 챕터를 완료하면 Verilog 하드웨어 기술에 필요한 자료형 체계와 비트 조작 문법을 완벽히 습득한다. 본 챕터의 내용은 HW02–HW04 전 과제에 걸쳐 매 행 적용된다. 특히 3절과 6절의 비트 슬라이싱 및 부호 확장(Sign Extension) 기법은 HW02 즉치수 생성기(ImmGen)의 핵심 구현 지식이다.
 
 본 챕터의 7대 학습 핵심:
 
@@ -298,12 +298,12 @@ make clean
 
 | 본 챕터 학습 내용 | 실제 과제 적용 대상 |
 |---|---|
-| 32비트 16진수 리터럴 표기 | HW02 `rtl/rv32_alu.v`의 기본값 배정 |
+| 32비트 16진수 리터럴 표기 | HW02 `rtl/alu.v`의 기본값 배정 |
 | `!==` 및 `$fatal` 검증문 | 모든 과제의 학생 추가 검증 testbench |
-| Part Select 필드 분해 | HW03 `rtl/rv32i_decode.v`의 명령어 디코더 |
-| Replication 부호 확장 | HW03 `rtl/rv32i_immgen.v`의 즉치수 조립 |
+| Part Select 필드 분해 | HW02 `rtl/rv32i_decode.v`의 명령어 디코더 |
+| Replication 부호 확장 | HW02 `rtl/rv32i_immgen.v`의 즉치수 조립 |
 | 폭 확장을 통한 Carry 추출 | HW02 ALU의 Carry 플래그 생성 논리 |
-| Indexed Part Select | HW05 캐시 데이터의 바이트 선택 회로 |
+| Indexed Part Select | HW04 캐시 데이터의 바이트 선택 회로 |
 
 ---
 

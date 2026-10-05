@@ -248,10 +248,10 @@ make clean
 |---|---|
 | 33비트 덧셈을 통한 Carry 추출 | HW02 ALU `carry` 플래그 |
 | Signed 부호 반전 조건식 | HW02 ALU `overflow` 플래그 |
-| Reduction NOR 연산자 (`~|`) | HW02 ALU `zero` 플래그 및 HW03 `x0` 불변식 판정 |
+| Reduction NOR 연산자 (`~|`) | HW02 ALU `zero` 플래그 및 HW02 `x0` 불변식 판정 |
 | `$signed` 양측 캐스팅 | HW02 ALU `slt` 및 `sra` 연산 |
-| 하위 5비트 시프트 마스크 | HW02, HW04 시프트 연산기 |
-| 괄호 기반 우선순위 명시 | HW04, HW05 파이프라인 제어 신호 디코더 |
+| 하위 5비트 시프트 마스크 | HW02, HW03 시프트 연산기 |
+| 괄호 기반 우선순위 명시 | HW03, HW04 파이프라인 제어 신호 디코더 |
 
 ---
 

@@ -58,11 +58,16 @@ make webbook-check
 
 이 저장소의 검증 범위는 Icarus Verilog 시뮬레이션, `PASS` 판정, VCD와 CSV trace다. 합성과 FPGA 구현은 별도 도구와 검증 단계에서 다룬다.
 
-## 과제 공개 방식
+## 학생 과제
 
-과제 자료는 수업 진도와 LMS 공지에 맞추어 [`assignments/`](assignments/README.md)에 순차적으로 추가한다. 공개된 과제는 저장소의 commit과 Git tag로 버전을 고정한다.
+현재 공개 범위는 **HW01·HW02**이다. 한국어 자료는 [assignments/](assignments/README.md), 영어 자료는 [assignments_en/](assignments_en/README.md)에 있다. 각 폴더에는 starter code, 공개 검사, 보고서 양식과 LMS 안내문을 제공한다.
 
-공개 전 과제의 starter code와 testbench는 교수자 관리 저장소에서 보관한다. 이 공개 저장소의 Git 이력에는 공개 시점부터 해당 과제 파일을 추가한다.
+- [한국어 HW01–HW02 ZIP](downloads/archlab-hw01-hw02-ko.zip)
+- [English HW01–HW02 ZIP](downloads/archlab-hw01-hw02-en.zip)
+
+두 과제는 각각 구현 50점·검증 30점·보고서 20점으로 평가한다. 제출 마감은 LMS를 따른다. 과제 실행에는 Python 3.11 이상을 사용한다.
+
+HW03은 단일사이클 코어 통합, HW04는 파이프라인 의존성·성능을 학습한다. 두 과제는 주제 소개만 제공하며, 구현 자료와 상세 명세는 추후 공개한다.
 
 ## 점검 과제
 

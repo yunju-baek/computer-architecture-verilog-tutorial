@@ -29,7 +29,7 @@ echo $?            # 0: PASS, 1: $fatal error termination
 ### Assignment Verification and Deliverable Packaging
 
 ```bash
-cd assignments/hw02
+cd assignments_en/hw02
 make setup-check   # Verify toolchain prerequisites
 make test          # Run public test suite
 make student-test  # Run student test suite

@@ -60,9 +60,16 @@ make webbook-check
 
 The GitHub Pages workflow on the `main` branch automatically deploys the built webbook upon passing all test suites.
 
-## Course Assignments
+## Student assignments
 
-Assignment materials are added sequentially to [`assignments/`](assignments/README.md) in accordance with the course syllabus and LMS announcements. Released assignments are version-pinned via repository commits and Git tags.
+**HW01 and HW02 are available.** Use [assignments_en/](assignments_en/README.md) for English or [assignments/](assignments/README.md) for Korean. Each assignment includes starter code, public tests, a report template, and an LMS announcement.
+
+- [English HW01–HW02 ZIP](downloads/archlab-hw01-hw02-en.zip)
+- [한국어 HW01–HW02 ZIP](downloads/archlab-hw01-hw02-ko.zip)
+
+Each assignment is worth 100 points: implementation 50, verification 30, report 20. Follow the LMS deadline. Assignment tools require Python 3.11 or later.
+
+HW03 will cover single-cycle core integration. HW04 will cover pipeline dependencies and performance. Only their topics and learning goals are previewed here; implementation files and detailed specifications will follow when each assignment opens.
 
 ## Check Assignments
 

@@ -2,7 +2,7 @@
 
 ## 1. Learning Objectives
 
-This chapter establishes modular design techniques for combining multiple submodules into a complete processor core. In HW04, you assemble the five unit modules developed in HW03 into the top-level single-cycle core (`rv32i_core.v`) following the instantiation protocols presented here.
+This chapter establishes modular design techniques for combining multiple submodules into a complete processor core. In HW03, you assemble the four reusable modules developed in HW02 into the top-level single-cycle core (`rv32i_core.v`) following the instantiation protocols presented here.
 
 **The Hierarchical Design Invariant**: All module instantiations must use explicit named port mapping (`.port_name(signal_name)`), and all internal interconnecting nets (`wire`) must be explicitly declared with exact bit widths.
 
@@ -177,7 +177,7 @@ Omitting parameter overrides synthesizes submodules with default bit widths, tru
 
 ## 8. Five-Step Top-Level Core Integration Procedure
 
-1. Verify submodules: Prepare unit modules that have passed isolated testbenches in HW03.
+1. Verify submodules: Prepare unit modules that have passed isolated testbenches in HW02.
 2. Declare interconnect nets: Declare internal data buses and control lines with explicit bit widths at the top of the core.
 3. Instantiate via named mapping: Bind all submodules using `.port(signal)` mapping, resolving all compiler warnings.
 4. Execute integrated testbench: Apply instruction sequences to verify end-to-end datapath execution.
@@ -199,10 +199,10 @@ make clean
 
 | Chapter Concept | Assignment Application |
 |---|---|
-| Named port module instantiation | Single-cycle datapath assembly in HW04 `rtl/rv32i_core.v` |
-| Interconnect bus vectorization | Wiring `alu_src1`, `alu_src2`, and `imm_ext` in HW04 |
-| Hierarchical signal probing | Isolating pipeline hazard bugs in HW04 and HW05 |
-| Parameterized module construction | Scalable pipeline register widths in HW05 |
+| Named port module instantiation | Single-cycle datapath assembly in HW03 `rtl/rv32i_core.v` |
+| Interconnect bus vectorization | Wiring `alu_src1`, `alu_src2`, and `imm_ext` in HW03 |
+| Hierarchical signal probing | Isolating pipeline hazard bugs in HW03 and HW04 |
+| Parameterized module construction | Scalable pipeline register widths in HW04 |
 
 ---
 

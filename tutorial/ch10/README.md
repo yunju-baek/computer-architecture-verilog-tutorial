@@ -187,10 +187,10 @@ make clean
 
 | 본 챕터 학습 내용 | 실제 과제 적용 대상 |
 |---|---|
-| Verilog-2001 RTL 작성 | HW02–HW05 학생 제출 `rtl/*.v` 소스 코드 |
-| SystemVerilog 테스트벤치 분석 | HW02–HW05 제공 공개 테스트벤치(`tests/*.v`) 분석 |
+| Verilog-2001 RTL 작성 | HW02–HW04 학생 제출 `rtl/*.v` 소스 코드 |
+| SystemVerilog 테스트벤치 분석 | HW02–HW04 제공 공개 테스트벤치(`tests/*.v`) 분석 |
 | `logic` vs `wire`/`reg` 매핑 | 최상위 인터페이스 포트 정합 |
-| `packed struct` 필드 매핑 | HW03 `rv32i_decode.v` 및 HW04 데이터 경로 디코딩 |
+| `packed struct` 필드 매핑 | HW02 `rv32i_decode.v` 및 HW03 데이터 경로 디코딩 |
 
 ---
 

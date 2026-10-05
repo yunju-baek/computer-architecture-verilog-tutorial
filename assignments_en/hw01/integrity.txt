@@ -1,0 +1,11 @@
+# Student verification and responsibility record
+
+Record how you checked your submission and how you judged the results. Complete this record even if you wrote all the code yourself.
+
+- References or tools used (optional):
+- Tasks where you used those references or tools (optional):
+- Decisions or changes you made:
+- Verification commands you ran:
+- Evidence files supporting your report:
+- Three architectural rules you can explain:
+- Responsibility confirmation: I can explain the submitted code, tests, evidence, and report, and I have checked the execution results myself.

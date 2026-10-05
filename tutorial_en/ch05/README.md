@@ -154,7 +154,7 @@ always @(posedge clk or posedge reset) begin
 end
 ```
 
-Synchronous resets evaluate exclusively on rising clock edges, filtering glitch noise and simplifying static timing analysis. All course projects (HW03 through HW05) standardize on synchronous resets.
+Synchronous resets evaluate exclusively on rising clock edges, filtering glitch noise and simplifying static timing analysis. All course projects (HW02 through HW04) standardize on synchronous resets.
 
 ---
 
@@ -205,11 +205,11 @@ make clean
 
 | Chapter Concept | Assignment Application |
 |---|---|
-| `always @(posedge clk)` and `<=` | Sequential state units across HW03, HW04, and HW05 |
-| `reset > load > enable` priority | Program Counter in HW03 `rtl/pc_counter.v` |
+| `always @(posedge clk)` and `<=` | Sequential state units across HW02, HW03, and HW04 |
+| `reset > load > enable` priority | Program Counter in HW02 `rtl/pc_counter.v` |
 | Synchronous reset architecture | Reset logic across processor cores |
-| Clock-disabled state retention | Load-use hazard stall interlock in HW05 |
-| Concurrent pipeline register updates | Pipeline stage registers in HW05 |
+| Clock-disabled state retention | Load-use hazard stall interlock in HW04 |
+| Concurrent pipeline register updates | Pipeline stage registers in HW04 |
 
 ---
 

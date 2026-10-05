@@ -1,16 +1,21 @@
 {
   "repository": "yunju-baek/computer-architecture-verilog-tutorial",
-  "release_profile": "tutorial-webbook",
+  "release_profile": "tutorial-webbook-and-hw01-hw02",
   "version": "tutorial-1.2.0",
   "published": [
     "tutorial",
     "tutorial_en",
     "webbook",
     "check_packet",
-    "check_packet_en"
+    "check_packet_en",
+    "assignments",
+    "assignments_en"
   ],
-  "assignments": [],
-  "assignment_release_policy": "Add each assignment to the public Git history at its announced release time.",
+  "assignments": [
+    "hw01",
+    "hw02"
+  ],
+  "assignment_release_policy": "Publish HW01 and HW02 only. HW03 and HW04 remain topic previews until separately authorized.",
   "webbook": {
     "pages": 24,
     "languages": [
@@ -42,5 +47,14 @@
     ],
     "student_inputs": "derived from STUDENT_ID in student.mk (common/lcg.vh)",
     "submission": "make package -> verilog_checkN_<id>.zip"
+  },
+  "assignment_languages": {
+    "ko": "assignments",
+    "en": "assignments_en"
+  },
+  "assignment_version": "archlab-3.0.0-hw01-hw02",
+  "assignment_previews": {
+    "hw03": "Single-cycle core integration; topic only",
+    "hw04": "Pipeline dependencies and performance; topic only"
   }
 }

@@ -1,4 +1,4 @@
-.PHONY: help setup-check tutorial test tutorial-en test-en errors waves webbook webbook-check check-packet-verify check-packet-en-verify clean package-check
+.PHONY: help setup-check tutorial test tutorial-en test-en errors waves webbook webbook-check check-packet-verify check-packet-en-verify clean package-check assignment-package-check assignment-downloads
 
 help:
 	@echo 'make setup-check   # Icarus Verilog 도구 확인'
@@ -10,6 +10,7 @@ help:
 	@echo 'make webbook-check # 웹북 구조와 링크 검증'
 	@echo 'make clean         # 생성물 정리'
 	@echo 'make package-check # 공개 패키지 검증'
+	@echo 'make assignment-package-check # HW01/HW02 공개 범위와 배포 검증'
 	@echo 'make check-packet-verify # 점검 과제 probe 컴파일 확인'
 	@echo 'make check-packet-en-verify # 점검 과제 영어판 probe 컴파일 확인'
 
@@ -75,10 +76,16 @@ package-check:
 	@test -d tutorial_en
 	@test -d check_packet
 	@test -d check_packet_en
-	@test -z "$$(find assignments -mindepth 1 -maxdepth 1 -type d -print -quit)"
+	@$(MAKE) --no-print-directory assignment-package-check
 	@$(MAKE) --no-print-directory test
 	@$(MAKE) --no-print-directory test-en
 	@$(MAKE) --no-print-directory webbook-check
 	@$(MAKE) --no-print-directory check-packet-verify
 	@$(MAKE) --no-print-directory check-packet-en-verify
 	@echo 'PASS public tutorial and webbook package'
+
+assignment-downloads:
+	python3 tools/build_assignment_downloads.py
+
+assignment-package-check:
+	python3 tools/check_assignments.py

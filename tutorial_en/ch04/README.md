@@ -2,7 +2,7 @@
 
 ## 1. Learning Objectives
 
-This chapter establishes design methods for complex combinational logic using procedural `always @*` blocks. The HW02 RV32 ALU and the HW03 single-cycle instruction decoder follow the architectural template developed here.
+This chapter establishes design methods for complex combinational logic using procedural `always @*` blocks. The HW02 RV32 ALU and the HW02 single-cycle instruction decoder follow the architectural template developed here.
 
 **The Combinational Design Invariant**: Every output signal driven within a combinational procedural block must receive an explicit assignment across all possible execution paths. Adhering to this invariant synthesizes pure combinational logic; omitting an assignment along any branch forces synthesis tools to infer unwanted transparent latches.
 
@@ -122,7 +122,7 @@ always @* begin
 end
 ```
 
-Pre-assigning defaults at the head of the procedural block ensures every output net receives a deterministic value even if subsequent branches omit it. This structure defines the standard coding style for HW03 `rv32i_decode.v`.
+Pre-assigning defaults at the head of the procedural block ensures every output net receives a deterministic value even if subsequent branches omit it. This structure defines the standard coding style for HW02 `rv32i_decode.v`.
 
 ---
 
@@ -163,7 +163,7 @@ always @* begin
 end
 ```
 
-The nested `if-else` prioritization directly models the HW05 forwarding priority structure (`EX/MEM` over `MEM/WB`).
+The nested `if-else` prioritization directly models the HW04 forwarding priority structure (`EX/MEM` over `MEM/WB`).
 
 ---
 
@@ -244,10 +244,10 @@ make clean
 
 | Chapter Concept | Assignment Application |
 |---|---|
-| `always @*` with blocking assignments | Operational kernel in HW02 `rtl/rv32_alu.v` |
-| Default value pre-assignment | Control decoder in HW03 `rtl/rv32i_decode.v` |
-| Exhaustive `case` with `default` | Opcode and function decoding across HW02 and HW03 |
-| Chained `if-else` priority | Forwarding path selection in HW05 |
+| `always @*` with blocking assignments | Operational kernel in HW02 `rtl/alu.v` |
+| Default value pre-assignment | Control decoder in HW02 `rtl/rv32i_decode.v` |
+| Exhaustive `case` with `default` | Opcode and function decoding across HW02 |
+| Chained `if-else` priority | Forwarding path selection in HW04 |
 | Pure combinational synthesis (zero latches) | Submission verification across all projects |
 
 ---

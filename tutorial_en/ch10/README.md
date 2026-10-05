@@ -187,10 +187,10 @@ make clean
 
 | Chapter Concept | Assignment Application |
 |---|---|
-| Verilog-2001 synthesizable RTL | Student source files (`rtl/*.v`) in HW02 through HW05 |
+| Verilog-2001 synthesizable RTL | Student source files (`rtl/*.v`) in HW02 through HW04 |
 | SystemVerilog testbench reading | Interpreting course testbenches (`tests/*.v`) |
 | `logic` to `wire`/`reg` mapping | Connecting top-level processor interfaces |
-| `packed struct` field alignments | Bitfield decoding in HW03 `rv32i_decode.v` and HW04 |
+| `packed struct` field alignments | Bitfield decoding in HW02 `rv32i_decode.v` and HW03 |
 
 ---
 

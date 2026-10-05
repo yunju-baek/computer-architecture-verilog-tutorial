@@ -143,7 +143,7 @@ assign by_power_of_two = value >> 4;       // Mathematically identical to value 
 assign mod_power = value & 16'h000f;       // Mathematically identical to value % 16
 ```
 
-In processor cache tagging, indexing, and offset extraction (HW05), block sizes are powers of two, allowing bit slicing (`addr[9:4]`) and masking to achieve zero-cost hardware routing.
+In processor cache tagging, indexing, and offset extraction (HW04), block sizes are powers of two, allowing bit slicing (`addr[9:4]`) and masking to achieve zero-cost hardware routing.
 
 ---
 
@@ -209,8 +209,8 @@ make clean
 | Chapter Concept | Assignment Application |
 |---|---|
 | Structural file separation | `rtl/` (synthesizable) vs. `tests/` (simulation-only) |
-| Shift-based arithmetic | HW02 ALU and HW05 cache address indexing |
-| 27-point self-check checklist | Pre-submission audit across HW02 through HW05 |
+| Shift-based arithmetic | HW02 ALU and HW04 cache address indexing |
+| 27-point self-check checklist | Pre-submission audit across HW02 through HW04 |
 | Zero-warning compilation | Automated grading CI/CD regression gating |
 
 ---

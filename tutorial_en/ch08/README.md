@@ -2,7 +2,7 @@
 
 ## 1. Learning Objectives
 
-This chapter establishes standard architectures for self-checking testbenches that automate hardware verification and pinpoint design defects. Across assignments HW02 through HW05, passing public testbenches and constructing comprehensive student test suites represent key grading criteria.
+This chapter establishes standard architectures for self-checking testbenches that automate hardware verification and pinpoint design defects. Across assignments HW02 through HW04, passing public testbenches and constructing comprehensive student test suites represent key grading criteria.
 
 **The Testbench Design Invariant**: Every verification scenario must replace manual `$display` inspections with automated programmatic comparisons and `$fatal` assertions, returning deterministic PASS/FAIL exit codes.
 
@@ -237,11 +237,11 @@ make clean
 
 | Chapter Concept | Assignment Application |
 |---|---|
-| 7-part testbench architecture | Student-authored testbenches in HW02 through HW05 |
+| 7-part testbench architecture | Student-authored testbenches in HW02 through HW04 |
 | 6-part boundary table | ALU flag validation in HW02 |
-| Seeded random verification | Register file read/write validation in HW03 |
-| CSV trace logging | `commit_trace.csv` in HW04 and `cpi_audit.csv` in HW05 |
-| Watchdog timeout safety | Execution safeguards across HW04 and HW05 test programs |
+| Seeded random verification | Register file read/write validation in HW02 |
+| CSV trace logging | `commit_trace.csv` in HW03 and `cpi_audit.csv` in HW04 |
+| Watchdog timeout safety | Execution safeguards across HW03 and HW04 test programs |
 
 ---
 

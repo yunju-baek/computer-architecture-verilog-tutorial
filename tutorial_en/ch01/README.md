@@ -329,10 +329,10 @@ PASS ch01
 
 | Chapter Concept | Assignment Application |
 |---|---|
-| `-g2012 -Wall -s` compiler options | Build infrastructure across HW02 through HW05 |
-| Port declarations and bus widths | 32-bit port interface in HW02 `rtl/rv32_alu.v` |
-| Continuous `assign` statements | Asynchronous read ports in HW03 `rtl/regfile.v` |
-| Explicit named port mapping | Core datapath integration in HW04 `rtl/rv32i_core.v` |
+| `-g2012 -Wall -s` compiler options | Build infrastructure across HW02 through HW04 |
+| Port declarations and bus widths | 32-bit port interface in HW02 `rtl/alu.v` |
+| Continuous `assign` statements | Asynchronous read ports in HW02 `rtl/regfile.v` |
+| Explicit named port mapping | Core datapath integration in HW03 `rtl/rv32i_core.v` |
 | `!==` and `$fatal` assertions | Public and student test suites across all projects |
 
 ---

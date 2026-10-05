@@ -2,7 +2,7 @@
 
 ## 1. Learning Objectives
 
-This chapter establishes design methods for two-dimensional register memory arrays storing large data blocks and two-block Finite State Machines (FSMs) managing complex control flows. The 32-bit register file (`regfile.v`) in HW03, single-cycle instruction/data memories in HW04, and pipeline controllers in HW05 directly build upon the design patterns developed here.
+This chapter establishes design methods for two-dimensional register memory arrays storing large data blocks and two-block Finite State Machines (FSMs) managing complex control flows. The 32-bit register file (`regfile.v`) in HW02, single-cycle instruction/data memories in HW03, and pipeline controllers in HW04 directly build upon the design patterns developed here.
 
 Two core invariants:
 
@@ -108,7 +108,7 @@ Timing trace comparison:
   56ns   2   |  a2    a2  (Following rising clock edge)
 ```
 
-Single-cycle RV32I cores (HW03, HW04) adopt combinational reads to complete instruction fetch and register read within a single clock cycle.
+Single-cycle RV32I cores (HW02, HW03) adopt combinational reads to complete instruction fetch and register read within a single clock cycle.
 
 ---
 
@@ -231,10 +231,10 @@ make clean
 
 | Chapter Concept | Assignment Application |
 |---|---|
-| 2D array with synchronous write | 32-entry register file in HW03 `rtl/regfile.v` |
-| 2-port combinational read | `rs1_data` and `rs2_data` read ports in HW03 |
-| `$readmemh` hex loader | Loading test programs in HW04 and HW05 testbenches |
-| 2-block FSM architecture | Bus interface and cache controllers in HW05 |
+| 2D array with synchronous write | 32-entry register file in HW02 `rtl/regfile.v` |
+| 2-port combinational read | `rs1_data` and `rs2_data` read ports in HW02 |
+| `$readmemh` hex loader | Loading test programs in HW03 and HW04 testbenches |
+| 2-block FSM architecture | Bus interface and cache controllers in HW04 |
 | `localparam` state enumeration | ALU operation encodings and pipeline control vectors |
 
 ---

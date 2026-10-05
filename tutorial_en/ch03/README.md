@@ -2,7 +2,7 @@
 
 ## 1. Learning Objectives
 
-This chapter connects directly to HW02, where you implement a 32-bit RV32 ALU and derive the `zero`, `carry`, and `overflow` status flags. Accurate arithmetic design depends on the bit-width expansion rules and sign-interpretation mechanisms established here.
+This chapter connects directly to HW02, where you implement 32-bit ALU results and inspect the supplied `zero`, `carry`, and `overflow` logic. Accurate arithmetic design depends on the bit-width expansion rules and sign-interpretation mechanisms established here.
 
 Bit-width truncation errors represent the most frequent class of silent failures in Verilog HDL. Mastering standard operator semantics prevents unflagged upper-bit drops and arithmetic distortion.
 
@@ -248,10 +248,10 @@ make clean
 |---|---|
 | 33-bit addition for carry-out | Carry flag generation in HW02 ALU |
 | Two's complement sign-inversion check | Overflow flag generation in HW02 ALU |
-| Reduction NOR operator (`~|`) | Zero flag in HW02 ALU and `x0` ground checks in HW03 |
+| Reduction NOR operator (`~|`) | Zero flag in HW02 ALU and `x0` ground checks in HW02 |
 | Dual-operand `$signed` casting | HW02 ALU `slt` and `sra` instructions |
-| Lower 5-bit shift masking | HW02 ALU and HW04 datapath shift execution |
-| Parenthesized precedence enforcement | Control signal decoding in HW04 and HW05 |
+| Lower 5-bit shift masking | HW02 ALU and HW03 datapath shift execution |
+| Parenthesized precedence enforcement | Control signal decoding in HW03 and HW04 |
 
 ---
 

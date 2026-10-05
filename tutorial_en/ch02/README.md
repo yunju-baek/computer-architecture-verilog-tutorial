@@ -2,7 +2,7 @@
 
 ## 1. Learning Objectives
 
-Upon completing this chapter, you understand the core Verilog data types, literal formats, and bit-level manipulation operators. The concepts presented here apply directly across assignments HW02 through HW05. In particular, the bit-slicing and sign-extension techniques in Sections 6 and 7 provide the foundational implementation knowledge for the HW03 Immediate Generator (ImmGen).
+Upon completing this chapter, you understand the core Verilog data types, literal formats, and bit-level manipulation operators. The concepts presented here apply directly across assignments HW02 through HW04. In particular, the bit-slicing and sign-extension techniques in Sections 6 and 7 provide the foundational implementation knowledge for the HW02 Immediate Generator (ImmGen).
 
 Seven core competencies:
 
@@ -298,10 +298,10 @@ make clean
 
 | Chapter Concept | Assignment Application |
 |---|---|
-| 32-bit hexadecimal literals | Pre-assigning default outputs in HW02 `rtl/rv32_alu.v` |
+| 32-bit hexadecimal literals | Pre-assigning default outputs in HW02 `rtl/alu.v` |
 | `!==` and `$fatal` assertions | Custom student testbenches across all assignments |
-| Part-Select bit extraction | Instruction field decoding in HW03 `rtl/rv32i_decode.v` |
-| Sign-extension replication | Immediate assembly in HW03 `rtl/rv32i_immgen.v` |
+| Part-Select bit extraction | Instruction field decoding in HW02 `rtl/rv32i_decode.v` |
+| Sign-extension replication | Immediate assembly in HW02 `rtl/rv32i_immgen.v` |
 | Width expansion for carry-out | Carry flag generation in the HW02 ALU |
 | Indexed Part Select (`+:`) | Byte extraction in memory sub-systems |
 

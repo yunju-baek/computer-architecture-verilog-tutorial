@@ -57,12 +57,12 @@ make errors
 | 챕터 | 주제 | 다루는 핵심 내용 | 연계 과제 |
 |---|---|---|---|
 | [ch01](ch01/README.md) | 도구와 첫 모듈 | `iverilog`/`vvp` 실행 파이프라인, `module` 포트 선언, `assign`, 자가검사 testbench, 오류 메시지 분석 | 전 과제 |
-| [ch02](ch02/README.md) | 문법과 자료형 | 리터럴 표기, `0`/`1`/`x`/`z` 4치 논리, `wire`/`reg` 구동 원칙, 비트 슬라이싱, 비트 결합 및 부호 확장, `parameter` | HW02, HW03 |
+| [ch02](ch02/README.md) | 문법과 자료형 | 리터럴 표기, `0`/`1`/`x`/`z` 4치 논리, `wire`/`reg` 구동 원칙, 비트 슬라이싱, 비트 결합 및 부호 확장, `parameter` | HW02 |
 | [ch03](ch03/README.md) | 연산자와 비트 폭 규칙 | 연산자 우선순위, 5대 비트 폭 확장 규칙, 부호 해석, 3종 시프트 연산, 4대 ALU 플래그 독립성 | HW02 |
-| [ch04](ch04/README.md) | 조합논리 회로 설계 | `always @*`, `case` 완결성, 기본값 선행 배정, 우선순위 인코딩, `function`, 래치(Latch) 추론 방지 | HW02, HW03 |
-| [ch05](ch05/README.md) | 순차논리 회로 설계 | `always @(posedge clk)`, 논블로킹 대입(`<=`), 동기 리셋, reset > load > enable 우선순위 | HW03, HW04, HW05 |
-| [ch06](ch06/README.md) | 계층 구조와 파라미터화 | 계층 모듈화, 이름 기반 명시적 포트 결합, 계층 경로 신호 관측, `generate` 반복문 | HW04 |
-| [ch07](ch07/README.md) | 메모리와 FSM | 2차원 배열 선언, 조합 읽기와 동기 읽기 타이밍, `$readmemh`, 2-블록 FSM 표준 골격 | HW03, HW04, HW05 |
+| [ch04](ch04/README.md) | 조합논리 회로 설계 | `always @*`, `case` 완결성, 기본값 선행 배정, 우선순위 인코딩, `function`, 래치(Latch) 추론 방지 | HW02 |
+| [ch05](ch05/README.md) | 순차논리 회로 설계 | `always @(posedge clk)`, 논블로킹 대입(`<=`), 동기 리셋, reset > load > enable 우선순위 | HW02, HW03, HW04 |
+| [ch06](ch06/README.md) | 계층 구조와 파라미터화 | 계층 모듈화, 이름 기반 명시적 포트 결합, 계층 경로 신호 관측, `generate` 반복문 | HW03 |
+| [ch07](ch07/README.md) | 메모리와 FSM | 2차원 배열 선언, 조합 읽기와 동기 읽기 타이밍, `$readmemh`, 2-블록 FSM 표준 골격 | HW02, HW03, HW04 |
 | [ch08](ch08/README.md) | testbench 작성 기법 | 자가검사 표준 골격, `task` 모듈화, 32비트 경계값 벡터, 황금 참조 모델 대조, VCD 및 CSV trace 생성 | 전 과제 |
 | [ch09](ch09/README.md) | 합성 가능 RTL 코딩 | 합성 가능 하드웨어 부분집합, 시뮬레이션 전용 구문 격리, 하드웨어 27대 점검 체크리스트 | 전 과제 |
 | [ch10](ch10/README.md) | SystemVerilog 대조표 | `logic`, `always_comb`/`always_ff`, `typedef enum`, packed struct, 프레임워크 소스 독해 5단계 | 전 과제 |
@@ -77,9 +77,9 @@ make errors
 | 1단계: 도구 환경 및 기초 | ch01 | 시뮬레이션 컴파일 및 실행, 컴파일러 진단 메시지 분석 |
 | 2단계: 자료형 및 비트 산술 | ch02, ch03 | 비트 폭 확장 규칙 및 부호 해석, HW02 산술 연산 준비 |
 | 3단계: 조합논리 및 자가검사 | ch04, ch08 | 기본값 선행 배정 및 testbench 작성, HW02 ALU 완성 |
-| 4단계: 순차논리 및 계층 결합 | ch05, ch06 | 논블로킹 상태 전이 및 모듈 계층 결합, HW03 단위 모듈 완성 |
-| 5단계: 메모리 타이밍 및 합성 | ch07, ch09 | 레지스터 배열 타이밍 및 FSM, HW04 단일사이클 통합 완성 |
-| 6단계: 현대적 표기 체계 독해 | ch10 | SystemVerilog 검증 구문 독해, HW05 파이프라인 프레임워크 분석 |
+| 4단계: 순차논리 및 계층 결합 | ch05, ch06 | 논블로킹 상태 전이 및 모듈 계층 결합, HW02 단위 모듈 완성 |
+| 5단계: 메모리 타이밍 및 합성 | ch07, ch09 | 레지스터 배열 타이밍 및 FSM, HW03 단일사이클 통합 완성 |
+| 6단계: 현대적 표기 체계 독해 | ch10 | SystemVerilog 검증 구문 독해, HW04 파이프라인 프레임워크 분석 |
 | 상시 참조 | [부록](appendix/README.md) | 하드웨어 구현 및 디버깅 중 수시 참조 |
 
 ---
@@ -99,10 +99,9 @@ make waves       # VCD 파형 생성 및 뷰어 실행
 | 과제 | 과제 주요 내용 | 필수 사전 학습 챕터 |
 |---|---|---|
 | HW01 | Architectural-State Programming | ch02 (명령어 필드 구조 참조) |
-| HW02 | Arithmetic and RV32 ALU | ch01, ch02, ch03, ch04, ch08 |
-| HW03 | TinyRV Building Blocks | ch02, ch04, ch05, ch06, ch07 |
-| HW04 | TinyRV Core Integration | ch05, ch06, ch07, ch08 |
-| HW05 | Forwarding and Load-Use Interlock | ch05, ch07, ch09, ch10 |
+| HW02 | TinyRV Building Blocks | ch02, ch04, ch05, ch06, ch07 |
+| HW03 | TinyRV Core Integration | ch05, ch06, ch07, ch08 |
+| HW04 | Forwarding and Load-Use Interlock | ch05, ch07, ch09, ch10 |
 
 ---
 
