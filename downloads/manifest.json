@@ -1,18 +1,37 @@
 {
+  "version": "archlab-3.0.1",
   "published_assignments": [
     "hw01",
     "hw02"
   ],
   "packages": {
-    "archlab-hw01-hw02-ko.zip": {
-      "files": 157,
-      "bytes": 166603,
-      "sha256": "675c888795fe8cb29d04397dd6687e85118dec791bccf57526ce5dc7e0d07249"
+    "archlab-hw01-ko.zip": {
+      "assignment": "hw01",
+      "language": "ko",
+      "files": 18,
+      "bytes": 24986,
+      "sha256": "6a2dd95aab1b70859d059c30beea2ba2eca2582b6772cc628ed29d05c5cdeeaf"
     },
-    "archlab-hw01-hw02-en.zip": {
-      "files": 157,
-      "bytes": 161586,
-      "sha256": "82d9a64a31eb173ca074acfe2e6ab5ff1f2d1ff34d45e3d5f8b38363fc27dc14"
+    "archlab-hw01-en.zip": {
+      "assignment": "hw01",
+      "language": "en",
+      "files": 18,
+      "bytes": 24416,
+      "sha256": "c66c1fb0d334eb86063652a9705c635dd6a1dd4a7a8547ca20650bd06f551e04"
+    },
+    "archlab-hw02-ko.zip": {
+      "assignment": "hw02",
+      "language": "ko",
+      "files": 143,
+      "bytes": 148113,
+      "sha256": "0482b7cda02b5442619c48fd63916b19d44c1c12e467569e59abd6f54a0cc613"
+    },
+    "archlab-hw02-en.zip": {
+      "assignment": "hw02",
+      "language": "en",
+      "files": 143,
+      "bytes": 143749,
+      "sha256": "a4e4f6070bc3230f8af4973a05b989eb72b2946989d2f0904086c6b30be86b96"
     }
   }
 }

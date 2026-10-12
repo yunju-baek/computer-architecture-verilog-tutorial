@@ -62,10 +62,14 @@ make webbook-check
 
 현재 공개 범위는 **HW01·HW02**이다. 한국어 자료는 [assignments/](assignments/README.md), 영어 자료는 [assignments_en/](assignments_en/README.md)에 있다. 각 폴더에는 starter code, 공개 검사와 보고서 양식을 제공한다.
 
-- [한국어 HW01–HW02 ZIP](downloads/archlab-hw01-hw02-ko.zip)
-- [English HW01–HW02 ZIP](downloads/archlab-hw01-hw02-en.zip)
+| 과제 | 한국어 | English |
+|---|---|---|
+| HW01 | [archlab-hw01-ko.zip](downloads/archlab-hw01-ko.zip) | [archlab-hw01-en.zip](downloads/archlab-hw01-en.zip) |
+| HW02 | [archlab-hw02-ko.zip](downloads/archlab-hw02-ko.zip) | [archlab-hw02-en.zip](downloads/archlab-hw02-en.zip) |
 
-두 과제는 각각 구현 50점·검증 30점·보고서 20점으로 평가한다. 제출 마감은 LMS를 따른다. 과제 실행에는 Python 3.11 이상을 사용한다.
+과제별 ZIP에는 해당 과제 폴더(`assignments/hwNN/`)만 들어 있으며, HW02 ZIP에는 선행 학습용 Verilog 자습서를 함께 넣었다.
+
+두 과제는 각각 구현 50점·검증 30점·보고서 20점으로 평가한다. 제출 마감은 LMS를 따른다. 과제 실행에는 Python 3.11 이상을 사용한다. HW01은 학번에서 파생한 입력으로 실행 기록을 만들고 `make package`로 제출 ZIP을 만든다.
 
 HW03은 단일사이클 코어 통합, HW04는 파이프라인 의존성·성능을 학습한다. 두 과제는 주제 소개만 제공하며, 구현 자료와 상세 명세는 추후 공개한다.
 

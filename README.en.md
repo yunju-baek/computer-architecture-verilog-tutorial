@@ -64,10 +64,14 @@ The GitHub Pages workflow on the `main` branch automatically deploys the built w
 
 **HW01 and HW02 are available.** Use [assignments_en/](assignments_en/README.md) for English or [assignments/](assignments/README.md) for Korean. Each assignment includes starter code, public tests, and a report template.
 
-- [English HW01–HW02 ZIP](downloads/archlab-hw01-hw02-en.zip)
-- [한국어 HW01–HW02 ZIP](downloads/archlab-hw01-hw02-ko.zip)
+| Assignment | English | 한국어 |
+|---|---|---|
+| HW01 | [archlab-hw01-en.zip](downloads/archlab-hw01-en.zip) | [archlab-hw01-ko.zip](downloads/archlab-hw01-ko.zip) |
+| HW02 | [archlab-hw02-en.zip](downloads/archlab-hw02-en.zip) | [archlab-hw02-ko.zip](downloads/archlab-hw02-ko.zip) |
 
-Each assignment is worth 100 points: implementation 50, verification 30, report 20. Follow the LMS deadline. Assignment tools require Python 3.11 or later.
+Each download holds one assignment folder (`assignments_en/hwNN/` or `assignments/hwNN/`). The HW02 download also includes the Verilog tutorial for preparation.
+
+Each assignment is worth 100 points: implementation 50, verification 30, report 20. Follow the LMS deadline. Assignment tools require Python 3.11 or later. HW01 generates its trace from input derived from your student ID, and `make package` builds the submission ZIP.
 
 HW03 will cover single-cycle core integration. HW04 will cover pipeline dependencies and performance. Only their topics and learning goals are previewed here; implementation files and detailed specifications will follow when each assignment opens.
 

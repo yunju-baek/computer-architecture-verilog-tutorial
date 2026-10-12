@@ -1,11 +1,11 @@
-# Student verification and responsibility record
+# HW01 verification and responsibility record
 
-Record how you checked your submission and how you judged the results. Complete this record even if you wrote all the code yourself.
+Write each answer after the colon. Long answers may continue on the next lines. Items marked (optional) apply only when relevant. Complete this record even if you wrote all the code yourself.
 
 - References or tools used (optional):
 - Tasks where you used those references or tools (optional):
 - Decisions or changes you made:
-- Verification commands you ran:
+- Commands you ran and their results (for example, make test 8/8 passed):
 - Evidence files supporting your report:
-- Three architectural rules you can explain:
-- Responsibility confirmation: I can explain the submitted code, tests, evidence, and report, and I have checked the execution results myself.
+- Three rules you can explain:
+- Final responsibility confirmation (write your student ID if you ran and can explain the submitted code, tests, evidence, and report):

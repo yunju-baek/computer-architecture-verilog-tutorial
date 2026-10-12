@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Small RV32I assembler and architectural-state simulator for HW01.
 
-The supported subset matches the instructions used by state_contract.s. Every
+The supported subset covers the RV32I integer instructions and common
+pseudo-instructions needed by state_contract.s (see SUPPORTED_SYNTAX). Every
 assembled instruction is a real 32-bit RV32I encoding. The simulator records
 the state transition committed by each instruction.
 """
@@ -32,6 +33,34 @@ ABI_NAMES = [
 REGISTERS = {name: index for index, name in enumerate(ABI_NAMES)}
 REGISTERS.update({f"x{index}": index for index in range(32)})
 REGISTERS["fp"] = 8
+
+R_OPS = {
+    "add": (0, 0x00), "sub": (0, 0x20), "sll": (1, 0x00), "slt": (2, 0x00),
+    "sltu": (3, 0x00), "xor": (4, 0x00), "srl": (5, 0x00), "sra": (5, 0x20),
+    "or": (6, 0x00), "and": (7, 0x00),
+}
+I_ALU_OPS = {"addi": 0, "slti": 2, "sltiu": 3, "xori": 4, "ori": 6, "andi": 7}
+SHIFT_OPS = {"slli": (1, 0x00), "srli": (5, 0x00), "srai": (5, 0x20)}
+IMMEDIATE_BASE = {
+    "addi": "add", "slti": "slt", "sltiu": "sltu", "xori": "xor", "ori": "or",
+    "andi": "and", "slli": "sll", "srli": "srl", "srai": "sra",
+}
+BRANCH_OPS = {"beq": 0, "bne": 1, "blt": 4, "bge": 5, "bltu": 6, "bgeu": 7}
+ZERO_BRANCHES = {
+    "beqz": ("beq", False), "bnez": ("bne", False), "bltz": ("blt", False),
+    "bgez": ("bge", False), "blez": ("bge", True), "bgtz": ("blt", True),
+}
+SWAPPED_BRANCHES = {"bgt": "blt", "ble": "bge", "bgtu": "bltu", "bleu": "bgeu"}
+SUPPORTED_SYNTAX = (
+    "R: add sub sll slt sltu xor srl sra or and",
+    "I: addi slti sltiu xori ori andi slli srli srai lw jalr",
+    "S/B/J: sw beq bne blt bge bltu bgeu jal ebreak",
+    "pseudo: nop mv li la neg not seqz snez j jr call ret "
+    "beqz bnez bltz bgez blez bgtz bgt ble bgtu bleu",
+    "directives: .data .text .globl .word; li immediate: -2048..2047",
+)
+TRACE_FIELDS = ["seq", "pc", "word", "asm", "rd", "rd_value", "mem_addr", "mem_value", "next_pc", "sp"]
+HEX_TRACE_FIELDS = {"pc", "word", "rd_value", "mem_addr", "mem_value", "next_pc", "sp"}
 
 
 class AssemblyError(ValueError):
@@ -109,10 +138,10 @@ def signed_field(value: int, bits: int, name: str) -> int:
 
 
 def parse_memory_operand(token: str) -> tuple[int, int]:
-    match = re.fullmatch(r"([^()]+)\(([^()]+)\)", token.replace(" ", ""))
+    match = re.fullmatch(r"([^()]*)\(([^()]+)\)", token.replace(" ", ""))
     if not match:
         raise AssemblyError(f"invalid memory operand: {token}")
-    return immediate(match.group(1)), register_index(match.group(2))
+    return immediate(match.group(1) or "0"), register_index(match.group(2))
 
 
 def split_statement(text: str) -> tuple[str, tuple[str, ...]]:
@@ -196,31 +225,60 @@ def normalize_instruction(item: PendingInstruction, labels: dict[str, int]) -> t
     if op == "ret":
         require_args(op, args, 0)
         return "jalr", ("zero", "0(ra)")
+    if op == "jr":
+        require_args(op, args, 1)
+        return "jalr", ("zero", f"0({args[0]})")
     if op == "j":
         require_args(op, args, 1)
         return "jal", ("zero", args[0])
-    if op == "call":
+    if op == "call" or (op == "jal" and len(args) == 1):
         require_args(op, args, 1)
         return "jal", ("ra", args[0])
+    if op == "jalr" and len(args) == 1:
+        return "jalr", ("ra", f"0({args[0]})")
+    if op == "jalr" and len(args) == 3:
+        return "jalr", (args[0], f"{args[2]}({args[1]})")
     if op == "nop":
         require_args(op, args, 0)
         return "addi", ("zero", "zero", "0")
+    if op == "neg":
+        require_args(op, args, 2)
+        return "sub", (args[0], "zero", args[1])
+    if op == "not":
+        require_args(op, args, 2)
+        return "xori", (args[0], args[1], "-1")
+    if op == "seqz":
+        require_args(op, args, 2)
+        return "sltiu", (args[0], args[1], "1")
+    if op == "snez":
+        require_args(op, args, 2)
+        return "sltu", (args[0], "zero", args[1])
+    if op in ZERO_BRANCHES:
+        require_args(op, args, 2)
+        base, swap = ZERO_BRANCHES[op]
+        return base, ("zero", args[0], args[1]) if swap else (args[0], "zero", args[1])
+    if op in SWAPPED_BRANCHES:
+        require_args(op, args, 3)
+        return SWAPPED_BRANCHES[op], (args[1], args[0], args[2])
     return op, args
 
 
 def encode_instruction(item: PendingInstruction, labels: dict[str, int]) -> Instruction:
     op, args = normalize_instruction(item, labels)
-    r_ops = {
-        "add": (0, 0x00), "sub": (0, 0x20), "and": (7, 0x00),
-        "or": (6, 0x00), "xor": (4, 0x00), "slt": (2, 0x00),
-    }
-    if op in r_ops:
+    if op in R_OPS:
         require_args(op, args, 3)
-        funct3, funct7 = r_ops[op]
+        funct3, funct7 = R_OPS[op]
         word = encode_r(register_index(args[0]), register_index(args[1]), register_index(args[2]), funct3, funct7)
-    elif op == "addi":
+    elif op in I_ALU_OPS:
         require_args(op, args, 3)
-        word = encode_i(register_index(args[0]), register_index(args[1]), immediate(args[2]), 0, 0x13)
+        word = encode_i(register_index(args[0]), register_index(args[1]), immediate(args[2]), I_ALU_OPS[op], 0x13)
+    elif op in SHIFT_OPS:
+        require_args(op, args, 3)
+        shamt = immediate(args[2])
+        if not 0 <= shamt <= 31:
+            raise AssemblyError(f"line {item.line}: shift amount out of range: {shamt}")
+        funct3, funct7 = SHIFT_OPS[op]
+        word = encode_i(register_index(args[0]), register_index(args[1]), (funct7 << 5) | shamt, funct3, 0x13)
     elif op == "lw":
         require_args(op, args, 2)
         offset, rs1 = parse_memory_operand(args[1])
@@ -233,11 +291,10 @@ def encode_instruction(item: PendingInstruction, labels: dict[str, int]) -> Inst
         require_args(op, args, 2)
         offset, rs1 = parse_memory_operand(args[1])
         word = encode_s(rs1, register_index(args[0]), offset, 2)
-    elif op in {"beq", "bne", "blt", "bge"}:
+    elif op in BRANCH_OPS:
         require_args(op, args, 3)
-        funct3 = {"beq": 0, "bne": 1, "blt": 4, "bge": 5}[op]
         target = resolve_label(labels, args[2], item.line)
-        word = encode_b(register_index(args[0]), register_index(args[1]), target - item.pc, funct3)
+        word = encode_b(register_index(args[0]), register_index(args[1]), target - item.pc, BRANCH_OPS[op])
     elif op == "jal":
         require_args(op, args, 2)
         target = resolve_label(labels, args[1], item.line)
@@ -358,25 +415,35 @@ def run(
         memory_address: int | None = None
         memory_value: int | None = None
 
-        if op in {"add", "sub", "and", "or", "xor", "slt"}:
+        if op in R_OPS or op in I_ALU_OPS or op in SHIFT_OPS:
             rd_index = register_index(args[0])
             left = registers[register_index(args[1])]
-            right = registers[register_index(args[2])]
-            if op == "add":
-                rd_value = u32(left + right)
-            elif op == "sub":
-                rd_value = u32(left - right)
-            elif op == "and":
-                rd_value = left & right
-            elif op == "or":
-                rd_value = left | right
-            elif op == "xor":
-                rd_value = left ^ right
+            if op in R_OPS:
+                right = registers[register_index(args[2])]
+                base = op
             else:
+                right = u32(immediate(args[2]))
+                base = IMMEDIATE_BASE[op]
+            if base == "add":
+                rd_value = u32(left + right)
+            elif base == "sub":
+                rd_value = u32(left - right)
+            elif base == "and":
+                rd_value = left & right
+            elif base == "or":
+                rd_value = left | right
+            elif base == "xor":
+                rd_value = left ^ right
+            elif base == "slt":
                 rd_value = int(s32(left) < s32(right))
-        elif op == "addi":
-            rd_index = register_index(args[0])
-            rd_value = u32(registers[register_index(args[1])] + immediate(args[2]))
+            elif base == "sltu":
+                rd_value = int(left < right)
+            elif base == "sll":
+                rd_value = u32(left << (right & 0x1F))
+            elif base == "srl":
+                rd_value = left >> (right & 0x1F)
+            else:
+                rd_value = u32(s32(left) >> (right & 0x1F))
         elif op == "lw":
             rd_index = register_index(args[0])
             offset, rs1 = parse_memory_operand(args[1])
@@ -387,7 +454,7 @@ def run(
             memory_address = u32(registers[rs1] + offset)
             memory_value = registers[register_index(args[0])]
             _write_word(memory, memory_address, memory_value)
-        elif op in {"beq", "bne", "blt", "bge"}:
+        elif op in BRANCH_OPS:
             left = registers[register_index(args[0])]
             right = registers[register_index(args[1])]
             taken = {
@@ -395,6 +462,8 @@ def run(
                 "bne": left != right,
                 "blt": s32(left) < s32(right),
                 "bge": s32(left) >= s32(right),
+                "bltu": left < right,
+                "bgeu": left >= right,
             }[op]
             if taken:
                 next_pc = program.labels[args[2]]
@@ -446,13 +515,20 @@ def write_hex(program: Program, target: Path | str) -> None:
     Path(target).write_text("".join(f"{word:08x}\n" for word in program.text_words), encoding="utf-8")
 
 
+def format_trace_row(row: dict[str, int | str]) -> dict[str, str]:
+    """Render addresses and values as 0x%08x so trace rows match report notation."""
+    rendered = {}
+    for field in TRACE_FIELDS:
+        value = row[field]
+        rendered[field] = f"0x{value:08x}" if field in HEX_TRACE_FIELDS and isinstance(value, int) else str(value)
+    return rendered
+
+
 def write_trace(rows: Iterable[dict[str, int | str]], target: Path | str) -> None:
-    rows = list(rows)
-    fieldnames = ["seq", "pc", "word", "asm", "rd", "rd_value", "mem_addr", "mem_value", "next_pc", "sp"]
     with Path(target).open("w", newline="", encoding="utf-8") as stream:
-        writer = csv.DictWriter(stream, fieldnames=fieldnames)
+        writer = csv.DictWriter(stream, fieldnames=TRACE_FIELDS)
         writer.writeheader()
-        writer.writerows(rows)
+        writer.writerows(format_trace_row(row) for row in rows)
 
 
 def state_dict(result: RunResult) -> dict[str, object]:

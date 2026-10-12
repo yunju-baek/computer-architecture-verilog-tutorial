@@ -52,10 +52,20 @@
     "ko": "assignments",
     "en": "assignments_en"
   },
-  "assignment_version": "archlab-3.0.0-hw01-hw02",
+  "assignment_version": "archlab-3.0.1",
   "assignment_previews": {
     "hw03": "Single-cycle core integration; topic only",
     "hw04": "Pipeline dependencies and performance; topic only"
   },
-  "lms_announcements": "instructor-held; excluded from public files and downloads"
+  "lms_announcements": "instructor-held; excluded from public files and downloads",
+  "assignment_downloads": {
+    "hw01": {
+      "ko": "downloads/archlab-hw01-ko.zip",
+      "en": "downloads/archlab-hw01-en.zip"
+    },
+    "hw02": {
+      "ko": "downloads/archlab-hw02-ko.zip",
+      "en": "downloads/archlab-hw02-en.zip"
+    }
+  }
 }

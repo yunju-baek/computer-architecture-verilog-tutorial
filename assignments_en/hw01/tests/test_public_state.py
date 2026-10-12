@@ -29,6 +29,13 @@ class ArchitecturalStateTests(unittest.TestCase):
         self.assertEqual(result.registers[register_index("sp")], 0x800)
         self.assertEqual(result.registers[0], 0)
 
+    def test_main_preserves_saved_registers(self):
+        sentinels = {"s0": 0x11111111, "s1": 0x22222222, "s2": 0x33333333}
+        result = run(self.program, initial_registers=sentinels)
+        for name, expected in sentinels.items():
+            self.assertEqual(result.registers[register_index(name)], expected, f"{name} must be restored")
+        self.assertEqual(result.registers[register_index("sp")], 0x800)
+
     def test_trace_exposes_control_register_and_memory_state(self):
         result = run(self.program)
         operations = [row["asm"].split()[0] for row in result.trace]

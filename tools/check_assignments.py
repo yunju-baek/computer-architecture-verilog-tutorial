@@ -54,26 +54,31 @@ def main():
     downloads = ROOT / "downloads"
     data = json.loads((downloads / "manifest.json").read_text())
     assert set(data["published_assignments"]) == ALLOWED
-    assert set(data["packages"]) == {"archlab-hw01-hw02-ko.zip", "archlab-hw01-hw02-en.zip"}
-    assert {p.name for p in downloads.glob("*.zip")} == set(data["packages"])
+    expected = {f"archlab-{hw}-{language}.zip" for hw in ALLOWED for language in ("ko", "en")}
+    assert set(data["packages"]) == expected, sorted(data["packages"])
+    assert {p.name for p in downloads.glob("*.zip")} == expected
     for name, record in data["packages"].items():
         path = downloads / name
+        hw, language = record["assignment"], record["language"]
+        assert name == f"archlab-{hw}-{language}.zip", name
         assert hashlib.sha256(path.read_bytes()).hexdigest() == record["sha256"], name
         with ZipFile(path) as archive:
             assert archive.testzip() is None
             check_names(archive.namelist())
             assert len(archive.namelist()) == record["files"]
-            with tempfile.TemporaryDirectory(prefix="public-hw12-") as tmp:
+            with tempfile.TemporaryDirectory(prefix="public-hw-") as tmp:
                 archive.extractall(tmp)
                 package = next(Path(tmp).iterdir())
                 check_links(package)
-                tree = package / ("assignments_en" if name.endswith("-en.zip") else "assignments")
-                assert {p.name for p in tree.iterdir() if p.is_dir()} == ALLOWED
-                for p in tree.rglob("*"):
-                    if p.is_file() and p.name != "README.md":
-                        source = ROOT / tree.name / p.relative_to(tree)
-                        assert p.read_bytes() == source.read_bytes(), p
-    print("PASS public assignments: HW01/HW02 only, bilingual parity, links, download hashes")
+                tree = package / ("assignments_en" if language == "en" else "assignments")
+                assert {p.name for p in tree.iterdir() if p.is_dir()} == {hw}, (name, "one assignment per download")
+                tutorial = package / ("tutorial_en" if language == "en" else "tutorial")
+                assert tutorial.is_dir() == (hw == "hw02"), (name, "tutorial only with hw02")
+                for p in package.rglob("*"):
+                    relative = p.relative_to(package)
+                    if p.is_file() and len(relative.parts) > 1:
+                        assert p.read_bytes() == (ROOT / relative).read_bytes(), p
+    print("PASS public assignments: HW01/HW02 only, bilingual parity, links, one download per assignment")
 
 if __name__ == "__main__":
     main()

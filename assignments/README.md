@@ -11,7 +11,9 @@
 
 Python 3.11 이상과 GNU Make를 사용하며, HW02에는 Icarus Verilog가 필요하다. 각 과제 폴더에서 `make setup-check`를 실행한다. 미완성 starter는 구현 후 `make test`를 통과하도록 구성한다. 실행 증거를 생성하고 보고서와 `integrity.txt`에 수행 내용을 기록한다.
 
-제공 도구와 공개 검사를 유지한다. 활용한 자료·도구를 기록하고 제출 코드와 결과를 직접 검증하고 설명한다. `make clean` 실행 전 제출용 증거를 별도로 보관한다.
+제공 도구와 공개 검사를 유지한다. 활용한 자료·도구를 기록하고 제출 코드와 결과를 직접 검증하고 설명한다.
+
+HW01은 `student_id.txt`에 학번을 적고 시작한다. 실행 기록은 학번에서 파생한 입력으로 만들어지며, `make package`가 만든 `submit/hw01_<학번>.zip` 파일 하나를 LMS에 올린다. HW01의 `make clean`은 evidence를 유지한다. HW02는 `make clean` 실행 전 제출용 증거를 별도로 보관한다.
 
 ## 이후 과제 미리보기
 
@@ -20,4 +22,4 @@ Python 3.11 이상과 GNU Make를 사용하며, HW02에는 Icarus Verilog가 필
 
 HW03·HW04는 주제와 학습 목표를 소개하는 단계이다. 구현 자료·테스트·상세 명세·보고서 양식은 각 과제의 공개 시점에 제공한다.
 
-[한국어 ZIP](../downloads/archlab-hw01-hw02-ko.zip) · [English assignments](../assignments_en/README.md) · [저장소 안내](../README.md)
+[HW01 ZIP](../downloads/archlab-hw01-ko.zip) · [HW02 ZIP](../downloads/archlab-hw02-ko.zip) · [English assignments](../assignments_en/README.md) · [저장소 안내](../README.md)

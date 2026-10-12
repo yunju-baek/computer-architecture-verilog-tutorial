@@ -1,11 +1,16 @@
 PYTHON ?= python3
 CC ?= cc
 CFLAGS ?= -std=c11 -Wall -Wextra -Werror -O0
+# Several ra restores in sum_array: uncomment and set the source line, e.g. RESTORE_LINE = 41
+# RESTORE_LINE =
 
-.PHONY: setup-check test test-c test-assembly student-test evidence ra-experiment clean help
+.PHONY: setup-check my-input test test-c test-assembly student-test evidence ra-experiment package clean clean-evidence help
 
 setup-check:
-	@$(PYTHON) -c 'import sys; assert sys.version_info >= (3,11); print("READY python=" + sys.version.split()[0])'
+	@$(PYTHON) -c 'import sys; assert sys.version_info >= (3,11), "Python 3.11 or later is required"; print("READY python=" + sys.version.split()[0])'
+
+my-input:
+	@PYTHONPATH=. $(PYTHON) scripts/student_input.py
 
 build/test_c: programs/state_contract.c tests/test_c.c
 	@mkdir -p build
@@ -22,15 +27,21 @@ student-test:
 
 test: setup-check test-assembly student-test
 
-evidence: test
-	@mkdir -p evidence
+evidence:
 	@PYTHONPATH=. $(PYTHON) scripts/make_evidence.py
 
-ra-experiment: test-assembly
+ra-experiment:
 	@PYTHONPATH=. $(PYTHON) scripts/ra_experiment.py $(if $(RESTORE_LINE),--restore-line $(RESTORE_LINE),)
 
+package:
+	@PYTHONPATH=. $(PYTHON) scripts/package_submission.py
+
 clean:
-	@rm -rf build evidence __pycache__ programs/__pycache__ scripts/__pycache__ tests/__pycache__ tools/__pycache__
+	@rm -rf build __pycache__ programs/__pycache__ scripts/__pycache__ tests/__pycache__ tools/__pycache__
+
+clean-evidence:
+	@rm -rf evidence
 
 help:
-	@echo 'make setup-check | test | test-c | test-assembly | student-test | evidence | ra-experiment | clean'
+	@echo 'make setup-check | my-input | test | evidence | ra-experiment | package'
+	@echo 'optional: make test-c | test-assembly | student-test | clean | clean-evidence'
